@@ -1,3 +1,8 @@
 venv
 *.pyc
 staticfiles
+
+# CR: local settings for connecting to heroku
+# should not be committed to heroku
+mouse2/local_settings.py
+mouse2/db_credentials

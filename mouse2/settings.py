@@ -12,6 +12,13 @@ https://docs.djangoproject.com/en/1.9/ref/settings/
 import os
 import dj_database_url
 
+# import local_settings if the file exists
+# this will set the DATABASE_URL so that we can use the django ORM
+# to access heroku's postgres database
+try:
+    from .local_settings import *
+except:
+    pass
 
 # For suit
 from django.conf.global_settings import TEMPLATE_CONTEXT_PROCESSORS as TCP
