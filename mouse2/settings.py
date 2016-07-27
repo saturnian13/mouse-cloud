@@ -12,6 +12,43 @@ https://docs.djangoproject.com/en/1.9/ref/settings/
 import os
 import dj_database_url
 
+
+# For suit
+from django.conf.global_settings import TEMPLATE_CONTEXT_PROCESSORS as TCP
+TEMPLATE_CONTEXT_PROCESSORS = TCP + [
+    'django.core.context_processors.request',
+]
+
+SUIT_CONFIG = {
+    # header
+    'ADMIN_NAME': 'Mouse Runner',
+    # 'HEADER_DATE_FORMAT': 'l, j. F Y',
+    # 'HEADER_TIME_FORMAT': 'H:i',
+
+    # forms
+    # 'SHOW_REQUIRED_ASTERISK': True,  # Default True
+    # 'CONFIRM_UNSAVED_CHANGES': True, # Default True
+
+    # menu
+    # 'SEARCH_URL': '/admin/auth/user/',
+    # 'MENU_ICONS': {
+    #    'sites': 'icon-leaf',
+    #    'auth': 'icon-lock',
+    # },
+    # 'MENU_OPEN_FIRST_CHILD': True, # Default True
+    # 'MENU_EXCLUDE': ('auth.group',),
+    # 'MENU': (
+    #     'sites',
+    #     {'app': 'auth', 'icon':'icon-lock', 'models': ('user', 'group')},
+    #     {'label': 'Settings', 'icon':'icon-cog', 'models': ('auth.user', 'auth.group')},
+    #     {'label': 'Support', 'icon':'icon-question-sign', 'url': '/support/'},
+    # ),
+
+    # misc
+    'LIST_PER_PAGE': 50
+}
+
+
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
@@ -29,6 +66,9 @@ DEBUG = True
 # Application definition
 
 INSTALLED_APPS = [
+    'runner.apps.RunnerConfig',
+    'crispy_forms',
+    'suit',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -102,9 +142,12 @@ AUTH_PASSWORD_VALIDATORS = [
 
 # Internationalization
 # https://docs.djangoproject.com/en/1.9/topics/i18n/
+DATETIME_FORMAT = 'Y-m-d H:i:s'
 
 LANGUAGE_CODE = 'en-us'
-TIME_ZONE = 'UTC'
+
+TIME_ZONE = 'America/New_York'
+
 USE_I18N = True
 USE_L10N = True
 USE_TZ = True
