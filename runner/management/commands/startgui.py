@@ -38,9 +38,10 @@ def create_combo_box(choice_l, index=None, choice=None):
         qcb.setCurrentIndex(choice_l.index(choice))
     return qcb
 
-def call_external(mouse, board, box):
+def call_external(mouse, board, box, **other_python_parameters):
     print mouse, board, box
-    ArduFSM.Runner.start_runner_cli.main(mouse=mouse, board=board, box=box)
+    ArduFSM.Runner.start_runner_cli.main(mouse=mouse, board=board, box=box,
+        **other_python_parameters)
 
 class MyApp(QtGui.QMainWindow, Ui_MainWindow):
     def __init__(self):
@@ -160,6 +161,9 @@ class MyApp(QtGui.QMainWindow, Ui_MainWindow):
             mouse=str(self.daily_plan_table.item(row, 0).text()),
             board=str(self.daily_plan_table.cellWidget(row, 3).currentText()),
             box=str(self.daily_plan_table.cellWidget(row, 2).currentText()),
+            #~ recent_date=str(self.target_date_display.getText()),
+            recent_weight=str(self.daily_plan_table.item(row, 1).text()),
+            recent_pipe=str(self.daily_plan_table.item(row, 4).text()),
         )
 
     def start_session2(self, row_qb):
