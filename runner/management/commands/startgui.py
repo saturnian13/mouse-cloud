@@ -8,6 +8,8 @@ Or, reconnect all buttons after a rearrange
 
 import sys
 from PyQt4 import QtCore, QtGui, uic
+from PyQt4.QtCore import *
+from PyQt4.QtGui import *
 from PyQt4.QtGui import QTableWidgetItem, QSpinBox, QComboBox, QPushButton
 import os
 import runner.models
@@ -53,6 +55,8 @@ class MyApp(QtGui.QMainWindow, Ui_MainWindow):
 
         # Populate the table with data
         self.set_table_data()
+
+        self.loadDateButton.clicked.connect(self.load_date)
     
         # Create Move Up and Move Down tools and hook them to methods
         # http://stackoverflow.com/questions/9166087/move-row-up-and-down-in-pyqt4
@@ -69,6 +73,13 @@ class MyApp(QtGui.QMainWindow, Ui_MainWindow):
         self.toolbar.addAction(self.move_up_action)
         self.toolbar.addAction(self.move_down_action)
     
+    def load_date(self):
+        date, time, ok = DateDialog.getDateTime()
+        date = date.toPyDate()
+
+        if ok:
+            self.target_date_display.setText(date.strftime('%Y-%m-%d'))
+
     def set_table_data(self):
         # Date of most recent session
         # Hack because the datetimes are coming back as aware but in UTC?
@@ -239,6 +250,38 @@ class Command(NoArgsCommand):
         window = MyApp()
         window.show()
         sys.exit(app.exec_())
+
+class DateDialog(QDialog):
+    def __init__(self, parent = None):
+        super(DateDialog, self).__init__(parent)
+
+        layout = QVBoxLayout(self)
+
+        # nice widget for editing the date
+        self.datetime = QDateTimeEdit(self)
+        self.datetime.setCalendarPopup(True)
+        self.datetime.setDateTime(QDateTime.currentDateTime())
+        layout.addWidget(self.datetime)
+
+        # OK and Cancel buttons
+        buttons = QDialogButtonBox(
+            QDialogButtonBox.Ok | QDialogButtonBox.Cancel,
+            Qt.Horizontal, self)
+        buttons.accepted.connect(self.accept)
+        buttons.rejected.connect(self.reject)
+        layout.addWidget(buttons)
+
+    # get current date and time from the dialog
+    def dateTime(self):
+        return self.datetime.dateTime()
+
+    # static method to create the dialog and return (date, time, accepted)
+    @staticmethod
+    def getDateTime(parent = None):
+        dialog = DateDialog(parent)
+        result = dialog.exec_()
+        date = dialog.dateTime()
+        return (date.date(), date.time(), result == QDialog.Accepted)
 
 
 if __name__ == "__main__":

@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1020</width>
+    <width>1200</width>
     <height>936</height>
    </rect>
   </property>
@@ -42,7 +42,7 @@
      <rect>
       <x>20</x>
       <y>80</y>
-      <width>951</width>
+      <width>1111</width>
       <height>501</height>
      </rect>
     </property>
@@ -175,6 +175,11 @@
       <string>Pipe Stop</string>
      </property>
     </column>
+    <column>
+     <property name="text">
+      <string>Notes</string>
+     </property>
+    </column>
     <item row="0" column="1">
      <property name="text">
       <string>-</string>
@@ -205,7 +210,7 @@
      </property>
     </item>
    </widget>
-   <widget class="QPushButton" name="pushButton">
+   <widget class="QPushButton" name="loadDateButton">
     <property name="geometry">
      <rect>
       <x>740</x>
@@ -326,8 +331,8 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1020</width>
-     <height>27</height>
+     <width>1200</width>
+     <height>22</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuS">
