@@ -6,7 +6,6 @@ import BeWatch
 import os
 import json
 import datetime
-import ParamLookups
 from django.utils import timezone
 from ArduFSM.plot import count_hits_by_type_from_trials_info
 import ArduFSM
