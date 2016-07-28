@@ -54,7 +54,7 @@ class MyApp(QtGui.QMainWindow, Ui_MainWindow):
             datetime.date.today().strftime('%Y-%m-%d'))
 
         # Populate the table with data
-        self.set_table_data()
+        self.initial_set_table_data()
 
         self.loadDateButton.clicked.connect(self.load_date)
     
@@ -78,20 +78,26 @@ class MyApp(QtGui.QMainWindow, Ui_MainWindow):
         date = date.toPyDate()
 
         if ok:
-            self.target_date_display.setText(date.strftime('%Y-%m-%d'))
+            self.daily_plan_table.clearContents()
+            self.set_table_data(date)
 
-    def set_table_data(self):
+    def initial_set_table_data(self):
         # Date of most recent session
         # Hack because the datetimes are coming back as aware but in UTC?
         # Are they being stored incorrectly in UTC?
         # Or is django just not retrieving them in the current timezone?
         target_date = runner.models.Session.objects.order_by(
             '-date_time_start')[0].date_time_start.astimezone(tz).date()
-        self.target_date_display.setText(target_date.strftime('%Y-%m-%d'))
+
+        self.set_table_data(target_date)
+ 
+
+    def set_table_data(self, date):
+        self.target_date_display.setText(date.strftime('%Y-%m-%d'))
         
         # Get all sessions on that date
         previous_sessions = runner.models.Session.objects.filter(
-            date_time_start__date=target_date).order_by('date_time_start')        
+            date_time_start__date=date).order_by('date_time_start')        
         
         # Fill out the new daily plan to look just like the old one
         box_l = sorted([box.name for box in runner.models.Box.objects.all()])
