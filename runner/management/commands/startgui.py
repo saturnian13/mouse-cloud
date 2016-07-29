@@ -53,6 +53,8 @@ class MyApp(QtGui.QMainWindow, Ui_MainWindow):
         self.todays_date_display.setText(
             datetime.date.today().strftime('%Y-%m-%d'))
 
+        self.selectedDate = datetime.date.today()
+
         # Populate the table with data
         self.initial_set_table_data()
 
@@ -74,12 +76,13 @@ class MyApp(QtGui.QMainWindow, Ui_MainWindow):
         self.toolbar.addAction(self.move_down_action)
     
     def load_date(self):
-        date, time, ok = DateDialog.getDateTime()
+        date, ok = DateDialog.getDate(self.selectedDate)
         date = date.toPyDate()
 
         if ok:
             self.daily_plan_table.clearContents()
             self.set_table_data(date)
+            self.selectedDate = date
 
     def initial_set_table_data(self):
         # Date of most recent session
@@ -257,17 +260,20 @@ class Command(NoArgsCommand):
         window.show()
         sys.exit(app.exec_())
 
+
+
 class DateDialog(QDialog):
-    def __init__(self, parent = None):
+    def __init__(self, startDate, parent = None):
         super(DateDialog, self).__init__(parent)
 
         layout = QVBoxLayout(self)
 
         # nice widget for editing the date
-        self.datetime = QDateTimeEdit(self)
-        self.datetime.setCalendarPopup(True)
-        self.datetime.setDateTime(QDateTime.currentDateTime())
-        layout.addWidget(self.datetime)
+        self.dateEdit = QDateEdit(self)
+        self.dateEdit.setCalendarPopup(True)
+        self.dateEdit.setDate(startDate)
+        self.dateEdit.setMaximumDate(QDate.currentDate())
+        layout.addWidget(self.dateEdit)
 
         # OK and Cancel buttons
         buttons = QDialogButtonBox(
@@ -276,18 +282,19 @@ class DateDialog(QDialog):
         buttons.accepted.connect(self.accept)
         buttons.rejected.connect(self.reject)
         layout.addWidget(buttons)
+        
 
     # get current date and time from the dialog
-    def dateTime(self):
-        return self.datetime.dateTime()
+    def getSelectedDate(self):
+        return self.dateEdit.date()
 
     # static method to create the dialog and return (date, time, accepted)
     @staticmethod
-    def getDateTime(parent = None):
-        dialog = DateDialog(parent)
+    def getDate(startDate, parent = None):
+        dialog = DateDialog(startDate, parent)
         result = dialog.exec_()
-        date = dialog.dateTime()
-        return (date.date(), date.time(), result == QDialog.Accepted)
+        date = dialog.getSelectedDate()
+        return (date, result == QDialog.Accepted)
 
 
 if __name__ == "__main__":
