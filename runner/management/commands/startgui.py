@@ -172,6 +172,22 @@ class MyApp(QtGui.QMainWindow, Ui_MainWindow):
             # New pipe, text box
             item = QTableWidgetItem('-')
             self.daily_plan_table.setItem(nrow, 8, item)
+            
+            # Remove, button
+            rmvButton = QPushButton('Remove')
+            self.daily_plan_table.setCellWidget(nrow, 9, rmvButton)
+            #Necessary to keep track of changing index
+            index = QPersistentModelIndex(self.daily_plan_table.model().index(nrow, 9))
+
+            rmvButton.clicked.connect(functools.partial(self.removeRow, index))
+
+    def removeRow(self, index):
+        print "Row: {}".format(index.row())
+        self.daily_plan_table.removeRow(index.row())
+        #Replace vertical number labels
+        self.daily_plan_table.setVerticalHeaderLabels([str(i+1) for i in
+            range(self.daily_plan_table.rowCount())])
+            
 
     def start_session(self, row):
         """Collect data from row and pass to start session"""
