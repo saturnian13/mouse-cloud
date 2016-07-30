@@ -59,6 +59,8 @@ class MyApp(QtGui.QMainWindow, Ui_MainWindow):
         self.initial_set_table_data()
 
         self.loadDateButton.clicked.connect(self.load_date)
+
+        self.addRowButton.clicked.connect(self.addRow)
     
         # Create Move Up and Move Down tools and hook them to methods
         # http://stackoverflow.com/questions/9166087/move-row-up-and-down-in-pyqt4
@@ -118,7 +120,8 @@ class MyApp(QtGui.QMainWindow, Ui_MainWindow):
         # 7 - Performance, read only
         # 8 - Pipe stop, read only
 
-        self.daily_plan_table.setRowCount(len(previous_sessions) + 1)
+        #self.daily_plan_table.setRowCount(len(previous_sessions) + 1)
+        self.daily_plan_table.setRowCount(len(previous_sessions))
         for nrow, session in enumerate(previous_sessions):
             # Mouse name, read only
             item = QTableWidgetItem(session.mouse.name)
@@ -175,19 +178,68 @@ class MyApp(QtGui.QMainWindow, Ui_MainWindow):
             
             # Remove, button
             rmvButton = QPushButton('Remove')
-            self.daily_plan_table.setCellWidget(nrow, 9, rmvButton)
+            self.daily_plan_table.setCellWidget(nrow, 10, rmvButton)
             #Necessary to keep track of changing index
-            index = QPersistentModelIndex(self.daily_plan_table.model().index(nrow, 9))
+            index = QPersistentModelIndex(self.daily_plan_table.model().index(nrow, 10))
 
             rmvButton.clicked.connect(functools.partial(self.removeRow, index))
 
     def removeRow(self, index):
-        print "Row: {}".format(index.row())
         self.daily_plan_table.removeRow(index.row())
         #Replace vertical number labels
         self.daily_plan_table.setVerticalHeaderLabels([str(i+1) for i in
             range(self.daily_plan_table.rowCount())])
-            
+
+    def addRow(self):
+        index = self.daily_plan_table.rowCount()
+        self.daily_plan_table.insertRow(index)
+
+        box_l = sorted([box.name for box in runner.models.Box.objects.all()])
+        mouse_l = sorted([mouse.name for mouse in runner.models.Mouse.objects.all()])
+        board_l = sorted([board.name for board in runner.models.Board.objects.all()])
+         # Box, combo box
+        qcb = create_combo_box(box_l)
+        self.daily_plan_table.setCellWidget(index, 2, qcb)
+
+        # Board, combo box
+        qcb = create_combo_box(board_l)
+        self.daily_plan_table.setCellWidget(index, 3, qcb)
+
+        # Previous pipe, read only
+        text = ''
+        item = QTableWidgetItem(text)
+        item.setFlags(item.flags() ^ QtCore.Qt.ItemIsEditable)
+        self.daily_plan_table.setItem(index, 4, item)
+        
+        # Previous perf, read only
+        text = ''
+        item = QTableWidgetItem(text)
+        item.setFlags(item.flags() ^ QtCore.Qt.ItemIsEditable)
+        self.daily_plan_table.setItem(index, 5, item)
+
+        # Start, button
+        qb = QPushButton('Start')
+        #~ qb.setCheckable(True)
+        qb.clicked.connect(functools.partial(self.start_session2, qb))
+        self.daily_plan_table.setCellWidget(index, 6, qb)
+        
+        # New perf, read only
+        item = QTableWidgetItem('-')
+        item.setFlags(item.flags() ^ QtCore.Qt.ItemIsEditable)
+        self.daily_plan_table.setItem(index, 7, item)
+        
+        # New pipe, text box
+        item = QTableWidgetItem('-')
+        self.daily_plan_table.setItem(index, 8, item)
+        
+        # Remove, button
+        rmvButton = QPushButton('Remove')
+        self.daily_plan_table.setCellWidget(index, 10, rmvButton)
+        #Necessary to keep track of changing index
+        persindex = QPersistentModelIndex(self.daily_plan_table.model().index(index, 10))
+
+        rmvButton.clicked.connect(functools.partial(self.removeRow, persindex))
+
 
     def start_session(self, row):
         """Collect data from row and pass to start session"""
