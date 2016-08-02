@@ -6,3 +6,4 @@ whitenoise==3.2
 django-suit==0.2.18
 django-crispy-forms==1.6.0
 pandas
+matplotlib
