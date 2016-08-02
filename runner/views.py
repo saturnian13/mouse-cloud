@@ -53,9 +53,10 @@ def weight_plot(request):
         ax.set_xticklabels(labels, rotation=45, size='medium')
         ax.legend(cohort, loc='lower left', fontsize='medium')
 
-    plt.draw()
+    
     
     canvas = FigureCanvas(f)
+    canvas.draw()
     response = HttpResponse(content_type='image/png')
     canvas.print_png(response)
     return response
