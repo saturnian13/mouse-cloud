@@ -10,7 +10,7 @@ import pandas
 
 # I think there's a thread problem with importing pyplot here
 # Maybe if you specify matplotlib.use('Agg') it would be okay
-from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
+from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 import matplotlib.pyplot as plt
 
