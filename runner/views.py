@@ -12,6 +12,7 @@ import pandas
 # Maybe if you specify matplotlib.use('Agg') it would be okay
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 from matplotlib.figure import Figure
+import matplotlib.pyplot as plt
 
 import pytz 
 
@@ -53,6 +54,8 @@ def weight_plot(request):
         ax.set_xticklabels(labels, rotation=45, size='medium')
         ax.legend(cohort, loc='lower left', fontsize='medium')
 
+    plt.draw()
+    plt.show()
     
     
     canvas = FigureCanvas(f)
