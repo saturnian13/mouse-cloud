@@ -11,8 +11,7 @@ import pandas
 # I think there's a thread problem with importing pyplot here
 # Maybe if you specify matplotlib.use('Agg') it would be okay
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
-#~ from matplotlib.figure import Figure
-import matplotlib.pyplot as plt
+from matplotlib.figure import Figure
 
 import pytz 
 
@@ -26,11 +25,11 @@ def weight_plot(request):
         ['KM87', 'KM88', 'KF89', 'KF90'],
         ]
     
-    #~ f = Figure(figsize=(12, 4 * len(cohorts)), dpi=80)
-    #~ axa = [f.add_subplot(len(cohorts), 1, n_cohort + 1) 
-        #~ for n_cohort in range(len(cohorts))]
+    f = Figure(figsize=(12, 4 * len(cohorts)), dpi=80)
+    axa = [f.add_subplot(len(cohorts), 1, n_cohort + 1) 
+        for n_cohort in range(len(cohorts))]
 
-    f, axa = plt.subplots(len(cohorts), 1, figsize=(12, 4 * len(cohorts)), dpi=80)
+    #~ f, axa = plt.subplots(len(cohorts), 1, figsize=(12, 4 * len(cohorts)), dpi=80)
     f.subplots_adjust(top=.95, bottom=.1, hspace=.4)
     f.set_facecolor('w')
 
@@ -45,6 +44,8 @@ def weight_plot(request):
     piv = df.pivot_table(index='date', columns='mouse', values='weight')
     labels = map(str, piv.index)
     
+    axa[0].set_title('%d %d %s' % (piv.shape[0], piv.shape[1], str(piv.values)))
+    
     for cohort, ax in zip(cohorts, axa):
         cohort = [mouse for mouse in cohort if mouse in piv.columns]
         ax.plot(piv[cohort], marker='s', ls='-')
@@ -54,16 +55,7 @@ def weight_plot(request):
         ax.set_xticklabels(labels, rotation=45, size='medium')
         ax.legend(cohort, loc='lower left', fontsize='medium')
 
-    #~ f.canvas.draw()
-    #~ f.canvas.show()
-    plt.draw()
-    plt.show()
-    
-    
     canvas = FigureCanvas(f)
-    #~ canvas.draw()
     response = HttpResponse(content_type='image/png')
     canvas.print_png(response)
-    #~ f.canvas.print_png(response)
-    plt.close(f)
     return response
