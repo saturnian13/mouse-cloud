@@ -49,6 +49,7 @@ def weight_plot(request):
     for cohort, ax in zip(cohorts, axa):
         cohort = [mouse for mouse in cohort if mouse in piv.columns]
         ax.plot(piv[cohort], marker='s', ls='-')
+        ax.plot([16, 18, 20, 24, 26])
         ax.set_xlim((-0.5, len(piv) - .5))
         ax.set_xticks(range(len(piv)))
         labels = piv.index.format(formatter = lambda x: x.strftime('%m-%d'))
