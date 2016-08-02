@@ -10,7 +10,7 @@ import pandas
 
 # I think there's a thread problem with importing pyplot here
 # Maybe if you specify matplotlib.use('Agg') it would be okay
-from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
+from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 from matplotlib.figure import Figure
 import matplotlib.pyplot as plt
 
@@ -54,12 +54,16 @@ def weight_plot(request):
         ax.set_xticklabels(labels, rotation=45, size='medium')
         ax.legend(cohort, loc='lower left', fontsize='medium')
 
-    plt.draw()
-    plt.show()
+    f.canvas.draw()
+    f.canvas.show()
+    #~ plt.draw()
+    #~ plt.show()
     
     
-    canvas = FigureCanvas(f)
-    canvas.draw()
+    #~ canvas = FigureCanvas(f)
+    #~ canvas.draw()
     response = HttpResponse(content_type='image/png')
-    canvas.print_png(response)
+    #~ canvas.print_png(response)
+    f.canvas.print_png(response)
+
     return response
