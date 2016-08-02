@@ -10,23 +10,21 @@ import pandas
 
 # I think there's a thread problem with importing pyplot here
 # Maybe if you specify matplotlib.use('Agg') it would be okay
-#from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
-#from matplotlib.figure import Figure
-#import BeWatch
+from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
+from matplotlib.figure import Figure
 
-# Hack to get BeWatch
-#import sys, os
-#sys.path.append(os.path.abspath('..'))
-#import BeWatch
 import pytz 
 
 # Hack, see below
 tz = pytz.timezone('US/Eastern')
 
-# Create your views here.
-
 def weight_plot(request):
-    cohorts = BeWatch.db.getstarted()['cohorts']
+    cohorts = [
+        ['KM65', 'KF73', 'KF75', ],
+        ['KM81', 'KM83', 'KM84', 'KM85', 'KM86', ],
+        ['KM87', 'KM88', 'KF89', 'KF90'],
+        ]
+    
     f = Figure(figsize=(12, 4 * len(cohorts)), dpi=80)
     axa = [f.add_subplot(len(cohorts), 1, n_cohort + 1) 
         for n_cohort in range(len(cohorts))]
