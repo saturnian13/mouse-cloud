@@ -44,18 +44,14 @@ def weight_plot(request):
     piv = df.pivot_table(index='date', columns='mouse', values='weight')
     labels = map(str, piv.index)
     
-    axa[0].set_title('%d %d %s' % (piv.shape[0], piv.shape[1], str(piv.values)))
-    
     for cohort, ax in zip(cohorts, axa):
         cohort = [mouse for mouse in cohort if mouse in piv.columns]
         ax.plot(piv[cohort].values, marker='s', ls='-')
-        ax.plot([16, 18, 20, 24, 26])
         ax.set_xlim((-0.5, len(piv) - .5))
         ax.set_xticks(range(len(piv)))
         labels = piv.index.format(formatter = lambda x: x.strftime('%m-%d'))
         ax.set_xticklabels(labels, rotation=45, size='medium')
         ax.legend(cohort, loc='lower left', fontsize='medium')
-        ax.set_title(str(piv[cohort].values[:, 0]))
 
     canvas = FigureCanvas(f)
     response = HttpResponse(content_type='image/png')
