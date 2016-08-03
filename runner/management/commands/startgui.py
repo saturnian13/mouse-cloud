@@ -135,10 +135,12 @@ class MyApp(QtGui.QMainWindow, Ui_MainWindow):
             # Box, combo box
             qcb = create_combo_box(box_l, choice=session.box.name)
             self.daily_plan_table.setCellWidget(nrow, 2, qcb)
+            self.daily_plan_table.setItem(nrow, 2, QTableWidgetItem(''))
 
             # Board, combo box
             qcb = create_combo_box(board_l, choice=session.board.name)
             self.daily_plan_table.setCellWidget(nrow, 3, qcb)
+            self.daily_plan_table.setItem(nrow, 3, QTableWidgetItem(''))
             
             # Previous pipe, read only
             try:
@@ -166,6 +168,7 @@ class MyApp(QtGui.QMainWindow, Ui_MainWindow):
             #~ qb.setCheckable(True)
             qb.clicked.connect(functools.partial(self.start_session2, qb))
             self.daily_plan_table.setCellWidget(nrow, 6, qb)
+            self.daily_plan_table.setItem(nrow, 6, QTableWidgetItem(''))
             
             # New perf, read only
             item = QTableWidgetItem('-')
@@ -175,10 +178,14 @@ class MyApp(QtGui.QMainWindow, Ui_MainWindow):
             # New pipe, text box
             item = QTableWidgetItem('-')
             self.daily_plan_table.setItem(nrow, 8, item)
+
+            item = QTableWidgetItem('')
+            self.daily_plan_table.setItem(nrow, 9, item)
             
             # Remove, button
             rmvButton = QPushButton('Remove')
             self.daily_plan_table.setCellWidget(nrow, 10, rmvButton)
+            self.daily_plan_table.setItem(nrow, 10, QTableWidgetItem(''))
             #Necessary to keep track of changing index
             index = QPersistentModelIndex(self.daily_plan_table.model().index(nrow, 10))
 
@@ -200,10 +207,12 @@ class MyApp(QtGui.QMainWindow, Ui_MainWindow):
          # Box, combo box
         qcb = create_combo_box(box_l)
         self.daily_plan_table.setCellWidget(index, 2, qcb)
+        self.daily_plan_table.setItem(index, 2, QTableWidgetItem(''))
 
         # Board, combo box
         qcb = create_combo_box(board_l)
         self.daily_plan_table.setCellWidget(index, 3, qcb)
+        self.daily_plan_table.setItem(index, 3, QTableWidgetItem(''))
 
         # Previous pipe, read only
         text = ''
@@ -232,23 +241,36 @@ class MyApp(QtGui.QMainWindow, Ui_MainWindow):
         item = QTableWidgetItem('-')
         self.daily_plan_table.setItem(index, 8, item)
         
+        item = QTableWidgetItem('')
+        self.daily_plan_table.setItem(nrow, 9, item)
         # Remove, button
         rmvButton = QPushButton('Remove')
         self.daily_plan_table.setCellWidget(index, 10, rmvButton)
+        self.daily_plan_table.setItem(index, 10, QTableWidgetItem(''))
         #Necessary to keep track of changing index
         persindex = QPersistentModelIndex(self.daily_plan_table.model().index(index, 10))
 
         rmvButton.clicked.connect(functools.partial(self.removeRow, persindex))
 
 
+    def setRowColor(self, row, color):
+        for col in range(self.daily_plan_table.columnCount()):
+            self.daily_plan_table.item(row, col).setBackground(QBrush(QColor(color)))
+
+
     def start_session(self, row):
         """Collect data from row and pass to start session"""
         self.daily_plan_table.setCurrentCell(row, 6)
+        
+        self.setRowColor(row, 'green')
+
         call_external(
             mouse=str(self.daily_plan_table.item(row, 0).text()),
             board=str(self.daily_plan_table.cellWidget(row, 3).currentText()),
             box=str(self.daily_plan_table.cellWidget(row, 2).currentText()),
         )
+
+        self.setRowColor(row, 'red')
 
     def start_session2(self, row_qb):
         """Start the session associated with the push button for this row.
