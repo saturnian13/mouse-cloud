@@ -6,6 +6,8 @@ Or, reconnect all buttons after a rearrange
 
 """
 
+import threading
+
 import sys
 from PyQt4 import QtCore, QtGui, uic
 from PyQt4.QtCore import *
@@ -40,10 +42,6 @@ def create_combo_box(choice_l, index=None, choice=None):
         qcb.setCurrentIndex(choice_l.index(choice))
     return qcb
 
-def call_external(mouse, board, box):
-    print mouse, board, box
-    ArduFSM.Runner.start_runner_cli.main(mouse=mouse, board=board, box=box)
-
 class MyApp(QtGui.QMainWindow, Ui_MainWindow):
     def __init__(self):
         QtGui.QMainWindow.__init__(self)
@@ -76,7 +74,8 @@ class MyApp(QtGui.QMainWindow, Ui_MainWindow):
         self.toolbar = self.addToolBar('Toolbar')
         self.toolbar.addAction(self.move_up_action)
         self.toolbar.addAction(self.move_down_action)
-    
+
+  
     def load_date(self):
         date, ok = DateDialog.getDate(self.selectedDate)
         date = date.toPyDate()
@@ -242,7 +241,7 @@ class MyApp(QtGui.QMainWindow, Ui_MainWindow):
         self.daily_plan_table.setItem(index, 8, item)
         
         item = QTableWidgetItem('')
-        self.daily_plan_table.setItem(nrow, 9, item)
+        self.daily_plan_table.setItem(index, 9, item)
         # Remove, button
         rmvButton = QPushButton('Remove')
         self.daily_plan_table.setCellWidget(index, 10, rmvButton)
@@ -260,17 +259,23 @@ class MyApp(QtGui.QMainWindow, Ui_MainWindow):
 
     def start_session(self, row):
         """Collect data from row and pass to start session"""
-        self.daily_plan_table.setCurrentCell(row, 6)
-        
-        self.setRowColor(row, 'green')
+        #self.daily_plan_table.setCurrentCell(row, 6)
 
-        call_external(
-            mouse=str(self.daily_plan_table.item(row, 0).text()),
-            board=str(self.daily_plan_table.cellWidget(row, 3).currentText()),
-            box=str(self.daily_plan_table.cellWidget(row, 2).currentText()),
-        )
+        mouse=str(self.daily_plan_table.item(row, 0).text())
+        board=str(self.daily_plan_table.cellWidget(row, 3).currentText())
+        box=str(self.daily_plan_table.cellWidget(row, 2).currentText())
 
-        self.setRowColor(row, 'red')
+
+        #Use threading so process doesn't interrupt rest of gui
+        proc = threading.Thread(target=self.call_external, args=(mouse, board, box, row))
+        proc.start()
+
+#        call_external(
+#            mouse=str(self.daily_plan_table.item(row, 0).text()),
+#            board=str(self.daily_plan_table.cellWidget(row, 3).currentText()),
+#            box=str(self.daily_plan_table.cellWidget(row, 2).currentText()),
+#        )
+
 
     def start_session2(self, row_qb):
         """Start the session associated with the push button for this row.
@@ -287,6 +292,21 @@ class MyApp(QtGui.QMainWindow, Ui_MainWindow):
         
         # Extract the mouse, board, box from this row
         self.start_session(session_row)
+
+
+    def call_external(self, mouse, board, box, row):
+      print mouse, board, box
+      #Green means process is running
+      self.setRowColor(row, 'green')
+      try:
+          ArduFSM.Runner.start_runner_cli.main(mouse=mouse, board=board, box=box)
+          #Red means process completed
+          self.setRowColor(row, 'red')
+      except :
+          #Yellow means process failed
+          self.setRowColor(row, 'yellow')
+          raise 
+
     
     def move_row(self, old_row, new_row):
         """Move data from old_row to new_row
