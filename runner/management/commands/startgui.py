@@ -22,6 +22,8 @@ import pytz
 
 from django.core.management.base import NoArgsCommand
 
+os.chdir(os.path.dirname(os.path.realpath(__file__)))
+
 
 # Hack, see below
 tz = pytz.timezone('US/Eastern')
@@ -47,6 +49,10 @@ class MyApp(QtGui.QMainWindow, Ui_MainWindow):
         QtGui.QMainWindow.__init__(self)
         Ui_MainWindow.__init__(self)
         self.setupUi(self)
+
+        #Load notes
+        self.read_notes()
+        
 
         self.todays_date_display.setText(
             datetime.date.today().strftime('%Y-%m-%d'))
@@ -74,6 +80,9 @@ class MyApp(QtGui.QMainWindow, Ui_MainWindow):
         self.toolbar = self.addToolBar('Toolbar')
         self.toolbar.addAction(self.move_up_action)
         self.toolbar.addAction(self.move_down_action)
+
+        #Notes saving button
+        self.saveNotesButton.clicked.connect(self.save_notes)
 
   
     def load_date(self):
@@ -361,6 +370,21 @@ class MyApp(QtGui.QMainWindow, Ui_MainWindow):
         row = self.daily_plan_table.currentRow()        
         if row > 0:
             self.move_row(row + 1, row - 1)
+    
+    def save_notes(self):
+        today = datetime.date.today().strftime('%Y-%m-%d')
+        notesfile = open("./notes/notes-%s" % (today), "w")
+        text = self.notesWindow.toPlainText()
+        notesfile.write(text)
+
+        notesfile.close()
+
+    def read_notes(self):
+        today = datetime.date.today().strftime('%Y-%m-%d')
+        path = "./notes/notes-%s" % (today)
+        if os.path.exists(path):
+            self.notesWindow.setPlainText(open(path, 'r').read())
+
 
 
 class Command(NoArgsCommand):
