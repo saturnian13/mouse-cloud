@@ -7,6 +7,7 @@ Or, reconnect all buttons after a rearrange
 """
 
 import threading
+import csv
 
 import sys
 from PyQt4 import QtCore, QtGui, uic
@@ -379,11 +380,50 @@ class MyApp(QtGui.QMainWindow, Ui_MainWindow):
 
         notesfile.close()
 
+
+        self.write_table_to_csv()
+
     def read_notes(self):
         today = datetime.date.today().strftime('%Y-%m-%d')
         path = "./notes/notes-%s" % (today)
         if os.path.exists(path):
             self.notesWindow.setPlainText(open(path, 'r').read())
+
+    def write_table_to_csv(self):
+        
+        today = datetime.date.today().strftime('%Y-%m-%d')
+        path = "./history/history-%s.csv" % (today)
+
+        restricted_columns = [6, 10]
+        with open(path, 'w') as stream:
+            writer = csv.writer(stream)
+            
+            header = []
+            for col in range(self.daily_plan_table.columnCount()):
+                if col not in restricted_columns:
+                    colHeader = self.daily_plan_table.horizontalHeaderItem(col)
+                    header.append(colHeader.text())
+            
+            writer.writerow(header)
+
+
+            for row in range(self.daily_plan_table.rowCount()):
+                rowdata = []
+                for col in range(self.daily_plan_table.columnCount()):
+                    if col not in restricted_columns:
+
+                        widget = self.daily_plan_table.cellWidget(row, col)
+                        if widget:
+                            text = widget.currentText()
+                        else:
+                            item = self.daily_plan_table.item(row, col)
+                            text = item.text()
+
+                        rowdata.append(text)
+
+                writer.writerow(rowdata)
+    
+
 
 
 
