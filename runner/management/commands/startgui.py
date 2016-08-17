@@ -8,6 +8,8 @@ Or, reconnect all buttons after a rearrange
 
 import threading
 import csv
+import ArduFSM.Runner.Sandbox
+import time
 
 import sys
 from PyQt4 import QtCore, QtGui, uic
@@ -306,16 +308,41 @@ class MyApp(QtGui.QMainWindow, Ui_MainWindow):
 
     def call_external(self, mouse, board, box, row):
       print mouse, board, box
-      #Green means process is running
+
+    # Create a place to keep sandboxes
+      sandbox_root = os.path.expanduser('~/sandbox_root')
+      if not os.path.exists(sandbox_root):
+          os.mkdir(sandbox_root)
+
+      user_input = {'mouse': mouse, 'board': board, 'box': box}
+      sandbox_paths = ArduFSM.Runner.Sandbox.create_sandbox(user_input, sandbox_root)
+
+      #Green indicates process is running
       self.setRowColor(row, 'green')
+
+      #Track successful compilation
+      success = True
       try:
-          ArduFSM.Runner.start_runner_cli.main(mouse=mouse, board=board, box=box)
-          #Red means process completed
-          self.setRowColor(row, 'red')
+          ArduFSM.Runner.start_runner_cli.main(mouse=mouse, board=board, box=box, sandbox_paths=sandbox_paths)
       except :
-          #Yellow means process failed
+          #Yellow means arduino code didn't compile?
           self.setRowColor(row, 'yellow')
+          success = False
           raise 
+      finally:
+          if success:
+              sandbox_path = sandbox_paths['sandbox']
+              saved_filename = sandbox_path + '-saved'
+
+              #Look for saved version of sandbox every 4 seconds
+              while not os.path.exists(saved_filename):
+                  time.sleep(4)
+
+              #Red indicates process completion
+              self.setRowColor(row, 'red')
+
+              print "Session recorded in {} completed".format(sandbox_path)
+
 
     
     def move_row(self, old_row, new_row):
