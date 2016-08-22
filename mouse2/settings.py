@@ -13,11 +13,10 @@ import os
 import dj_database_url
 
 # import local_settings if the file exists
-# this will set the DATABASE_URL so that we can use the django ORM
-# to access heroku's postgres database
+# this will set the DATABASE_URL and SECRET_KEY environment variables
 try:
     from .local_settings import *
-except:
+except ImportError:
     pass
 
 # For suit
@@ -65,10 +64,10 @@ PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
 # See https://docs.djangoproject.com/en/1.9/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "6@5-qqbpiezx%zpny19rx&qnh8-9lu-f2)p&_ano$=&62-h&$6"
+SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False #True
+DEBUG = False
 
 # Application definition
 
@@ -183,3 +182,21 @@ STATICFILES_DIRS = [
 # Simplified static file serving.
 # https://warehouse.python.org/project/whitenoise/
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
+# https://chrxr.com/django-error-logging-configuration-heroku/
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console'],
+            'level': os.getenv('DJANGO_LOG_LEVEL', 'ERROR'),
+        },
+    },
+}
+
