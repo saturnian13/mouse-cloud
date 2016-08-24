@@ -25,7 +25,9 @@ import pytz
 
 from django.core.management.base import NoArgsCommand
 
-os.chdir(os.path.dirname(os.path.realpath(__file__)))
+
+# What is this for??
+#~ os.chdir(os.path.dirname(os.path.realpath(__file__)))
 
 
 # Hack, see below
@@ -58,20 +60,20 @@ class MyApp(QtGui.QMainWindow, Ui_MainWindow):
         Ui_MainWindow.__init__(self)
         self.setupUi(self)
 
-        #Load notes
+        # Load notes from disk and populate notes window
         self.read_notes()
-        
 
         self.todays_date_display.setText(
             datetime.date.today().strftime('%Y-%m-%d'))
 
+        # This seems to be a variable that holds the template date
         self.selectedDate = datetime.date.today()
 
         # Populate the table with data
         self.initial_set_table_data()
 
+        # Set up buttons
         self.loadDateButton.clicked.connect(self.load_date)
-
         self.addRowButton.clicked.connect(self.addRow)
     
         # Create Move Up and Move Down tools and hook them to methods
@@ -89,11 +91,11 @@ class MyApp(QtGui.QMainWindow, Ui_MainWindow):
         self.toolbar.addAction(self.move_up_action)
         self.toolbar.addAction(self.move_down_action)
 
-        #Notes saving button
+        # Notes saving button
         self.saveNotesButton.clicked.connect(self.save_notes)
-
   
     def load_date(self):
+        """Get date from user dialog and fill table with that data"""
         date, ok = DateDialog.getDate(self.selectedDate)
         date = date.toPyDate()
 
@@ -103,6 +105,7 @@ class MyApp(QtGui.QMainWindow, Ui_MainWindow):
             self.selectedDate = date
 
     def initial_set_table_data(self):
+        """Get most recent data and fill table with it"""
         # Date of most recent session
         # Hack because the datetimes are coming back as aware but in UTC?
         # Are they being stored incorrectly in UTC?
@@ -112,8 +115,8 @@ class MyApp(QtGui.QMainWindow, Ui_MainWindow):
 
         self.set_table_data(target_date)
  
-
     def set_table_data(self, date):
+        """Populates table with data from `date`"""
         self.target_date_display.setText(date.strftime('%Y-%m-%d'))
         
         # Get all sessions on that date
@@ -136,7 +139,6 @@ class MyApp(QtGui.QMainWindow, Ui_MainWindow):
         # 7 - Performance, read only
         # 8 - Pipe stop, read only
 
-        #self.daily_plan_table.setRowCount(len(previous_sessions) + 1)
         self.daily_plan_table.setRowCount(len(previous_sessions))
         for nrow, session in enumerate(previous_sessions):
             # Mouse name, read only
@@ -151,11 +153,15 @@ class MyApp(QtGui.QMainWindow, Ui_MainWindow):
             # Box, combo box
             qcb = create_combo_box(box_l, choice=session.box.name)
             self.daily_plan_table.setCellWidget(nrow, 2, qcb)
+            
+            # What does this do?
             self.daily_plan_table.setItem(nrow, 2, QTableWidgetItem(''))
 
             # Board, combo box
             qcb = create_combo_box(board_l, choice=session.board.name)
             self.daily_plan_table.setCellWidget(nrow, 3, qcb)
+            
+            # What does this do?
             self.daily_plan_table.setItem(nrow, 3, QTableWidgetItem(''))
             
             # Previous pipe, read only
@@ -195,6 +201,7 @@ class MyApp(QtGui.QMainWindow, Ui_MainWindow):
             item = QTableWidgetItem('-')
             self.daily_plan_table.setItem(nrow, 8, item)
 
+            # A place for notes
             item = QTableWidgetItem('')
             self.daily_plan_table.setItem(nrow, 9, item)
             
@@ -202,8 +209,10 @@ class MyApp(QtGui.QMainWindow, Ui_MainWindow):
             rmvButton = QPushButton('Remove')
             self.daily_plan_table.setCellWidget(nrow, 10, rmvButton)
             self.daily_plan_table.setItem(nrow, 10, QTableWidgetItem(''))
-            #Necessary to keep track of changing index
-            index = QPersistentModelIndex(self.daily_plan_table.model().index(nrow, 10))
+            
+            # Necessary to keep track of changing index
+            index = QPersistentModelIndex(
+                self.daily_plan_table.model().index(nrow, 10))
 
             rmvButton.clicked.connect(functools.partial(self.removeRow, index))
 
@@ -313,43 +322,38 @@ class MyApp(QtGui.QMainWindow, Ui_MainWindow):
 
 
     def call_external(self, mouse, board, box, row):
-      print mouse, board, box
+        """This is intended to be called in a thread"""
+        print mouse, board, box
 
-    # Create a place to keep sandboxes
-      sandbox_root = os.path.expanduser('~/sandbox_root')
-      if not os.path.exists(sandbox_root):
-          os.mkdir(sandbox_root)
+        user_input = {'mouse': mouse, 'board': board, 'box': box}
+        sandbox_paths = ArduFSM.Runner.Sandbox.create_sandbox(
+            user_input, os.path.expanduser('~/sandbox_root'))
 
-      user_input = {'mouse': mouse, 'board': board, 'box': box}
-      sandbox_paths = ArduFSM.Runner.Sandbox.create_sandbox(user_input, sandbox_root)
+        #Green indicates process is running
+        self.setRowColor(row, 'green')
 
-      #Green indicates process is running
-      self.setRowColor(row, 'green')
+        #Track successful compilation
+        success = True
+        try:
+            ArduFSM.Runner.start_runner_cli.main(mouse=mouse, board=board, box=box, sandbox_paths=sandbox_paths)
+        except :
+            #Yellow means arduino code didn't compile?
+            self.setRowColor(row, 'yellow')
+            success = False
+            raise 
+        finally:
+            if success:
+                sandbox_path = sandbox_paths['sandbox']
+                saved_filename = sandbox_path + '-saved'
 
-      #Track successful compilation
-      success = True
-      try:
-          ArduFSM.Runner.start_runner_cli.main(mouse=mouse, board=board, box=box, sandbox_paths=sandbox_paths)
-      except :
-          #Yellow means arduino code didn't compile?
-          self.setRowColor(row, 'yellow')
-          success = False
-          raise 
-      finally:
-          if success:
-              sandbox_path = sandbox_paths['sandbox']
-              saved_filename = sandbox_path + '-saved'
+                #Look for saved version of sandbox every 4 seconds
+                while not os.path.exists(saved_filename):
+                    time.sleep(4)
 
-              #Look for saved version of sandbox every 4 seconds
-              while not os.path.exists(saved_filename):
-                  time.sleep(4)
+                #Red indicates process completion
+                self.setRowColor(row, 'red')
 
-              #Red indicates process completion
-              self.setRowColor(row, 'red')
-
-              print "Session recorded in {} completed".format(sandbox_path)
-
-
+                print "Session recorded in {} completed".format(sandbox_path)
     
     def move_row(self, old_row, new_row):
         """Move data from old_row to new_row
