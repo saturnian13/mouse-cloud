@@ -47,11 +47,11 @@ def weight_plot(request):
     for cohort, ax in zip(cohorts, axa):
         cohort = [mouse for mouse in cohort if mouse in piv.columns]
         ax.plot(piv[cohort].values, marker='s', ls='-')
-        ax.set_xlim((len(piv) - 30 - 0.5, len(piv) - .5))
         ax.set_xticks(range(len(piv)))
         labels = piv.index.format(formatter = lambda x: x.strftime('%m-%d'))
         ax.set_xticklabels(labels, rotation=45, size='medium')
         ax.legend(cohort, loc='lower left', fontsize='medium')
+        ax.set_xlim((len(piv) - 30 - 0.5, len(piv) - .5))        
 
     canvas = FigureCanvas(f)
     response = HttpResponse(content_type='image/png')
