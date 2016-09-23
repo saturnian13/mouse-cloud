@@ -20,9 +20,9 @@ tz = pytz.timezone('US/Eastern')
 
 def weight_plot(request):
     cohorts = [
-        ['KM65', 'KF73', 'KF75', ],
-        ['KM81', 'KM83', 'KM84', 'KM85', 'KM86', ],
-        ['KM87', 'KM88', 'KF89', 'KF90'],
+        ['KM65', 'KF75', 'KM81', 'KM83',],
+        ['KM84', 'KM85', 'KM86',],
+        ['KM87', 'KM88', 'KF89', 'KF90', 'KM91',],
         ]
 
     f = Figure(figsize=(12, 4 * len(cohorts)), dpi=80)
@@ -47,11 +47,11 @@ def weight_plot(request):
     for cohort, ax in zip(cohorts, axa):
         cohort = [mouse for mouse in cohort if mouse in piv.columns]
         ax.plot(piv[cohort].values, marker='s', ls='-')
-        ax.set_xlim((-0.5, len(piv) - .5))
         ax.set_xticks(range(len(piv)))
         labels = piv.index.format(formatter = lambda x: x.strftime('%m-%d'))
         ax.set_xticklabels(labels, rotation=45, size='medium')
         ax.legend(cohort, loc='lower left', fontsize='medium')
+        ax.set_xlim((len(piv) - 30 - 0.5, len(piv) - .5))        
 
     canvas = FigureCanvas(f)
     response = HttpResponse(content_type='image/png')
