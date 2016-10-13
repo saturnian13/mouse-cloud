@@ -22,4 +22,6 @@ urlpatterns = [
     url(r'^admin/', admin.site.urls),
     url(r'^weights$', runner.views.weight_plot,
         name='weight_plot-simple',),    
+    url(r'^rewards$', runner.views.rewards_plot,
+        name='reward_plot'),
 ]
