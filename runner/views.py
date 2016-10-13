@@ -68,7 +68,7 @@ def rewards_plot(request):
 
     for box, ax in zip(boxes, axes):
         ax.set_title(box.name)
-        ax.set_ylabel('Water Volume (µL)')
+        ax.set_ylabel('Water Volume (uL)')
 
         
 
