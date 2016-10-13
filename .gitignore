@@ -6,3 +6,4 @@ staticfiles
 # should not be committed to heroku
 mouse2/local_settings.py
 mouse2/db_credentials
+runner/management/commands/notes/
