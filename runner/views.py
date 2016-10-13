@@ -7,6 +7,7 @@ from django.shortcuts import render_to_response
 from .models import Session
 
 import pandas
+import datetime
 
 # I think there's a thread problem with importing pyplot here
 # Maybe if you specify matplotlib.use('Agg') it would be okay
@@ -60,3 +61,25 @@ def weight_plot(request):
     response = HttpResponse(content_type='image/png')
     canvas.print_png(response)
     return response
+
+def rewards_plot(request):
+    boxes = Box.objects.all()
+    f = Figure()
+    axes = [f.add_subplot(len(boxes), 1, n+1) for n in range(len(boxes))]
+
+    for box, ax in zip(boxes, axes):
+        ax.set_title(box.name)
+        ax.set_ylabel('Water Volume (µL)')
+
+        
+
+        # for box, ax
+        # for session in Session.objects.filter(box=box, date_time_start__lte=datetime.today)
+
+    canvas + FigureCanvas(f)
+    response = HttpResponse(content_type='image/png')
+    canvas.print_png(response)
+    return response
+    
+
+
