@@ -67,46 +67,52 @@ def rewards_plot(request):
     f = Figure(figsize=(12, 20), dpi=80)
 
     axes = [f.add_subplot(len(boxes), 1, n+1) for n in range(len(boxes))]
-    f.subplots_adjust(top=.95, bottom=.1, hspace=.4)
+    f.subplots_adjust(top=1.1, bottom=.1, hspace=.4)
     f.set_facecolor('w')
 
     for box, ax in zip(boxes, axes):
+        print box
+        box_sessions = Session.objects.filter(box=box, date_time_start__gte = date.today() - timedelta(days=60))
+        if len(box_sessions) > 0:
+            sessions_by_date = pandas.DataFrame.from_records(box_sessions.values())[["date_time_start", "user_data_left_water_consumption", "user_data_right_water_consumption"]].dropna()
+            
+            sessions_by_date.loc[:, "date_start"] = [dt.date() for dt in sessions_by_date["date_time_start"]]
+            # print sessions_by_date[["date_time_start", "user_data_left_water_consumption", "user_data_right_water_consumption"]]
+            volumes = sessions_by_date.groupby('date_start').aggregate(sum)
+
+            ax.plot(volumes["user_data_left_water_consumption"].values, '-o')
+            ax.plot(volumes["user_data_right_water_consumption"].values, '-o')
+
+            ax.set_xticks = range(len(volumes))
+            print len(volumes)
+            labels = volumes.index.format(formatter = lambda x: x.strftime('%m-%d'))
+            ax.set_xticklabels(labels, rotation=45, size='medium')
+            ax.set_ylabel('Volume released (uL)')
+            ax.set_title(box.name)
+            
+            
+
         
 
+        # volume_counts = sessions_by_date.groupby('date_time_start').aggregate(sum)
 
-        sessions = Session.objects.filter(box=box, date_time_start__gte = date.today() - timedelta(days=60))
-        dates = sessions.datetimes('date_time_start', 'day')
+        # volume_counts.plot(ax=ax)
+        # ax.plot(dates, left_volumes, 'bo-')
+        # ax.plot(dates, right_volumes, 'ro-')
 
-        left_volumes = []
-        right_volumes = []
-
-        for d in dates:
-            sessions_by_date = sessions.filter(date_time_start__date = d)
-
-            left_volume = sum([session.user_data_left_water_consumption for session in sessions_by_date]) / float(len(sessions_by_date))
-            right_volume = sum([session.user_data_right_water_consumption for session in sessions_by_date]) / float(len(sessions_by_date))
-
-            left_volumes.append(left_volume)
-            right_volumes.append(right_volume)
-
-        if dates:
-
-            ax.plot(dates, left_volumes, 'bo-')
-            ax.plot(dates, right_volumes, 'ro-')
-
-            date_range = max(dates) - min(dates)
-            labels = [(min(dates) + timedelta(days=i)).strftime("%b %d") for i in range(date_range.days + 1) ]
+        # date_range = max(dates) - min(dates)
+        # labels = [(min(dates) + timedelta(days=i)).strftime("%b %d") for i in range(date_range.days + 1) ]
 
 
-            ax.set_title(box.name)
-            ax.set_ylabel('Water Volume (uL)')
+        # ax.set_title(box.name)
+        # ax.set_ylabel('Water Volume (uL)')
 
-            ax.set_xticks(range(len(labels)))
-            ax.set_xticklabels(labels, rotation=45, size='medium')
+        # ax.set_xticks(range(len(labels)))
+        # ax.set_xticklabels(labels, rotation=45, size='medium')
 
-            ax.set_xlim(min(dates), max(dates))
+        # ax.set_xlim(min(dates), max(dates))
 
-            ax.legend(['Left Pipe', 'Right Pipe'], loc='upper right', fontsize='medium')
+        # ax.legend(['Left Pipe', 'Right Pipe'], loc='upper right', fontsize='medium')
 
     canvas = FigureCanvas(f)
     response = HttpResponse(content_type='image/png')
