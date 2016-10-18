@@ -72,7 +72,7 @@ def rewards_plot(request):
 
     # Set up figure dimensions
     axes = [f.add_subplot(len(boxes), 1, n+1) for n in range(len(boxes))]
-    f.subplots_adjust(top=0.95, bottom=.1, hspace=.4)
+    f.subplots_adjust(top=0.95, bottom=.1, hspace=.6)
     f.set_facecolor('w')
 
     for box, ax in zip(boxes, axes):
@@ -80,25 +80,26 @@ def rewards_plot(request):
         #Get all sessions within the past 60 days that the box owns
         box_sessions = Session.objects.filter(box=box, date_time_start__gte = date.today() - timedelta(days=60))
         if len(box_sessions) > 0:
-            sessions_by_date = pandas.DataFrame.from_records(box_sessions.values())[["date_time_start", "user_data_left_water_consumption", "user_data_right_water_consumption"]].dropna()
+            sessions_by_date = pandas.DataFrame.from_records(box_sessions.values())[["date_time_start", "user_data_left_valve_mean", "user_data_right_valve_mean"]].dropna()
             
             sessions_by_date.loc[:, "date_start"] = [dt.date() for dt in sessions_by_date["date_time_start"]]
             
             #Average the water consumption values by date
             volumes = sessions_by_date.groupby('date_start').aggregate(np.mean)
 
-            left_volume = volumes["user_data_left_water_consumption"].values
-            right_volume = volumes["user_data_right_water_consumption"].values
+            left_volume = volumes["user_data_left_valve_mean"].values * 1000
+            right_volume = volumes["user_data_right_valve_mean"].values *1000
 
-            left_color = 'r' if max(left_volume) > 0.8 else 'b'
-            right_color = 'r' if max(right_volume) > 0.8 else 'g'
+            #Warn user with different color plot if volume is out of desired range
+            left_color = 'b' if (left_volume >= 3.5).all() and (left_volume <= 6.5).all() else 'r'
+            right_color = 'g' if (left_volume >= 3.5).all() and (left_volume <= 6.5).all() else 'r'
 
             ax.plot(left_volume, '-o', color=left_color)
-            ax.plot(right_volume, '-o', color=right_color)
+            ax.plot(right_volume, '--s', color=right_color)
 
            
-            # x ticks are still offset. Something to fix
-            ax.set_xticks = range(len(volumes))
+            
+            ax.set_xticks(range(len(volumes)))
             
             labels = volumes.index.format(formatter = lambda x: x.strftime('%m-%d'))
             ax.set_xticklabels(labels, rotation=45, size='medium')
