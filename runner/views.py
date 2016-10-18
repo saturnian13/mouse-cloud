@@ -27,7 +27,7 @@ def weight_plot(request):
     cohorts = [
         ['KM65', 'KF75', 'KM83', 'KM84', 'KM85', 'KM86',],
         ['KM87', 'KM88', 'KF89', 'KF90',],
-        ['KM91', 'KF94', 'KF95', 'KM97'],
+        ['KM91', 'KF94', 'KF95',],
         ]
 
     f = Figure(figsize=(12, 4 * len(cohorts)), dpi=80)
