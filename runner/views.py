@@ -9,11 +9,14 @@ from .models import Box
 
 import pandas
 from datetime import date, timedelta
+import numpy as np
+
 
 # I think there's a thread problem with importing pyplot here
 # Maybe if you specify matplotlib.use('Agg') it would be okay
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 from matplotlib.figure import Figure
+from matplotlib.dates import date2num
 import pytz 
 import models
 
@@ -63,56 +66,50 @@ def weight_plot(request):
     return response
 
 def rewards_plot(request):
+    
     boxes = Box.objects.all()
     f = Figure(figsize=(12, 20), dpi=80)
 
+    # Set up figure dimensions
     axes = [f.add_subplot(len(boxes), 1, n+1) for n in range(len(boxes))]
-    f.subplots_adjust(top=1.1, bottom=.1, hspace=.4)
+    f.subplots_adjust(top=0.95, bottom=.1, hspace=.4)
     f.set_facecolor('w')
 
     for box, ax in zip(boxes, axes):
-        print box
+        
+        #Get all sessions within the past 60 days that the box owns
         box_sessions = Session.objects.filter(box=box, date_time_start__gte = date.today() - timedelta(days=60))
         if len(box_sessions) > 0:
             sessions_by_date = pandas.DataFrame.from_records(box_sessions.values())[["date_time_start", "user_data_left_water_consumption", "user_data_right_water_consumption"]].dropna()
             
             sessions_by_date.loc[:, "date_start"] = [dt.date() for dt in sessions_by_date["date_time_start"]]
-            # print sessions_by_date[["date_time_start", "user_data_left_water_consumption", "user_data_right_water_consumption"]]
-            volumes = sessions_by_date.groupby('date_start').aggregate(sum)
+            
+            #Average the water consumption values by date
+            volumes = sessions_by_date.groupby('date_start').aggregate(np.mean)
 
-            ax.plot(volumes["user_data_left_water_consumption"].values, '-o')
-            ax.plot(volumes["user_data_right_water_consumption"].values, '-o')
+            left_volume = volumes["user_data_left_water_consumption"].values
+            right_volume = volumes["user_data_right_water_consumption"].values
 
+            left_color = 'r' if max(left_volume) > 0.8 else 'b'
+            right_color = 'r' if max(right_volume) > 0.8 else 'g'
+
+            ax.plot(left_volume, '-o', color=left_color)
+            ax.plot(right_volume, '-o', color=right_color)
+
+           
+            # x ticks are still offset. Something to fix
             ax.set_xticks = range(len(volumes))
-            print len(volumes)
+            
             labels = volumes.index.format(formatter = lambda x: x.strftime('%m-%d'))
             ax.set_xticklabels(labels, rotation=45, size='medium')
+
+            
+
             ax.set_ylabel('Volume released (uL)')
             ax.set_title(box.name)
-            
-            
-
-        
-
-        # volume_counts = sessions_by_date.groupby('date_time_start').aggregate(sum)
-
-        # volume_counts.plot(ax=ax)
-        # ax.plot(dates, left_volumes, 'bo-')
-        # ax.plot(dates, right_volumes, 'ro-')
-
-        # date_range = max(dates) - min(dates)
-        # labels = [(min(dates) + timedelta(days=i)).strftime("%b %d") for i in range(date_range.days + 1) ]
+            ax.legend(["Left Water Consumption", "Right Water Consumption"], loc='lower right', fontsize='medium')
 
 
-        # ax.set_title(box.name)
-        # ax.set_ylabel('Water Volume (uL)')
-
-        # ax.set_xticks(range(len(labels)))
-        # ax.set_xticklabels(labels, rotation=45, size='medium')
-
-        # ax.set_xlim(min(dates), max(dates))
-
-        # ax.legend(['Left Pipe', 'Right Pipe'], loc='upper right', fontsize='medium')
 
     canvas = FigureCanvas(f)
     response = HttpResponse(content_type='image/png')
