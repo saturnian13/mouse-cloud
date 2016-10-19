@@ -6,15 +6,8 @@ Or, reconnect all buttons after a rearrange
 
 """
 
-import threading
-import csv
-import ArduFSM.Runner.Sandbox
-import time
-
 import sys
 from PyQt4 import QtCore, QtGui, uic
-from PyQt4.QtCore import *
-from PyQt4.QtGui import *
 from PyQt4.QtGui import QTableWidgetItem, QSpinBox, QComboBox, QPushButton
 import os
 import runner.models
@@ -24,10 +17,6 @@ import ArduFSM.Runner.start_runner_cli
 import pytz
 
 from django.core.management.base import NoArgsCommand
-
-
-# What is this for??
-#~ os.chdir(os.path.dirname(os.path.realpath(__file__)))
 
 
 # Hack, see below
@@ -60,21 +49,11 @@ class MyApp(QtGui.QMainWindow, Ui_MainWindow):
         Ui_MainWindow.__init__(self)
         self.setupUi(self)
 
-        # Load notes from disk and populate notes window
-        self.read_notes()
-
         self.todays_date_display.setText(
             datetime.date.today().strftime('%Y-%m-%d'))
 
-        # This seems to be a variable that holds the template date
-        self.selectedDate = datetime.date.today()
-
         # Populate the table with data
-        self.initial_set_table_data()
-
-        # Set up buttons
-        self.loadDateButton.clicked.connect(self.load_date)
-        self.addRowButton.clicked.connect(self.addRow)
+        self.set_table_data()
     
         # Create Move Up and Move Down tools and hook them to methods
         # http://stackoverflow.com/questions/9166087/move-row-up-and-down-in-pyqt4
@@ -90,38 +69,19 @@ class MyApp(QtGui.QMainWindow, Ui_MainWindow):
         self.toolbar = self.addToolBar('Toolbar')
         self.toolbar.addAction(self.move_up_action)
         self.toolbar.addAction(self.move_down_action)
-
-        # Notes saving button
-        self.saveNotesButton.clicked.connect(self.save_notes)
-  
-    def load_date(self):
-        """Get date from user dialog and fill table with that data"""
-        date, ok = DateDialog.getDate(self.selectedDate)
-        date = date.toPyDate()
-
-        if ok:
-            self.daily_plan_table.clearContents()
-            self.set_table_data(date)
-            self.selectedDate = date
-
-    def initial_set_table_data(self):
-        """Get most recent data and fill table with it"""
+    
+    def set_table_data(self):
         # Date of most recent session
         # Hack because the datetimes are coming back as aware but in UTC?
         # Are they being stored incorrectly in UTC?
         # Or is django just not retrieving them in the current timezone?
         target_date = runner.models.Session.objects.order_by(
             '-date_time_start')[0].date_time_start.astimezone(tz).date()
-
-        self.set_table_data(target_date)
- 
-    def set_table_data(self, date):
-        """Populates table with data from `date`"""
-        self.target_date_display.setText(date.strftime('%Y-%m-%d'))
+        self.target_date_display.setText(target_date.strftime('%Y-%m-%d'))
         
         # Get all sessions on that date
         previous_sessions = runner.models.Session.objects.filter(
-            date_time_start__date=date).order_by('date_time_start')        
+            date_time_start__date=target_date).order_by('date_time_start')        
         
         # Fill out the new daily plan to look just like the old one
         box_l = sorted([box.name for box in runner.models.Box.objects.all()])
@@ -139,7 +99,7 @@ class MyApp(QtGui.QMainWindow, Ui_MainWindow):
         # 7 - Performance, read only
         # 8 - Pipe stop, read only
 
-        self.daily_plan_table.setRowCount(len(previous_sessions))
+        self.daily_plan_table.setRowCount(len(previous_sessions) + 1)
         for nrow, session in enumerate(previous_sessions):
             # Mouse name, read only
             item = QTableWidgetItem(session.mouse.name)
@@ -153,16 +113,10 @@ class MyApp(QtGui.QMainWindow, Ui_MainWindow):
             # Box, combo box
             qcb = create_combo_box(box_l, choice=session.box.name)
             self.daily_plan_table.setCellWidget(nrow, 2, qcb)
-            
-            # What does this do?
-            self.daily_plan_table.setItem(nrow, 2, QTableWidgetItem(''))
 
             # Board, combo box
             qcb = create_combo_box(board_l, choice=session.board.name)
             self.daily_plan_table.setCellWidget(nrow, 3, qcb)
-            
-            # What does this do?
-            self.daily_plan_table.setItem(nrow, 3, QTableWidgetItem(''))
             
             # Previous pipe, read only
             try:
@@ -190,7 +144,6 @@ class MyApp(QtGui.QMainWindow, Ui_MainWindow):
             #~ qb.setCheckable(True)
             qb.clicked.connect(functools.partial(self.start_session2, qb))
             self.daily_plan_table.setCellWidget(nrow, 6, qb)
-            self.daily_plan_table.setItem(nrow, 6, QTableWidgetItem(''))
             
             # New perf, read only
             item = QTableWidgetItem('-')
@@ -200,88 +153,6 @@ class MyApp(QtGui.QMainWindow, Ui_MainWindow):
             # New pipe, text box
             item = QTableWidgetItem('-')
             self.daily_plan_table.setItem(nrow, 8, item)
-
-            # A place for notes
-            item = QTableWidgetItem('')
-            self.daily_plan_table.setItem(nrow, 9, item)
-            
-            # Remove, button
-            rmvButton = QPushButton('Remove')
-            self.daily_plan_table.setCellWidget(nrow, 10, rmvButton)
-            self.daily_plan_table.setItem(nrow, 10, QTableWidgetItem(''))
-            
-            # Necessary to keep track of changing index
-            index = QPersistentModelIndex(
-                self.daily_plan_table.model().index(nrow, 10))
-
-            rmvButton.clicked.connect(functools.partial(self.removeRow, index))
-
-    def removeRow(self, index):
-        self.daily_plan_table.removeRow(index.row())
-        #Replace vertical number labels
-        self.daily_plan_table.setVerticalHeaderLabels([str(i+1) for i in
-            range(self.daily_plan_table.rowCount())])
-
-    def addRow(self):
-        index = self.daily_plan_table.rowCount()
-        self.daily_plan_table.insertRow(index)
-
-        box_l = sorted([box.name for box in runner.models.Box.objects.all()])
-        mouse_l = sorted([mouse.name for mouse in runner.models.Mouse.objects.all()])
-        board_l = sorted([board.name for board in runner.models.Board.objects.all()])
-         # Box, combo box
-        qcb = create_combo_box(box_l)
-        self.daily_plan_table.setCellWidget(index, 2, qcb)
-        self.daily_plan_table.setItem(index, 2, QTableWidgetItem(''))
-
-        # Board, combo box
-        qcb = create_combo_box(board_l)
-        self.daily_plan_table.setCellWidget(index, 3, qcb)
-        self.daily_plan_table.setItem(index, 3, QTableWidgetItem(''))
-
-        # Previous pipe, read only
-        text = ''
-        item = QTableWidgetItem(text)
-        item.setFlags(item.flags() ^ QtCore.Qt.ItemIsEditable)
-        self.daily_plan_table.setItem(index, 4, item)
-        
-        # Previous perf, read only
-        text = ''
-        item = QTableWidgetItem(text)
-        item.setFlags(item.flags() ^ QtCore.Qt.ItemIsEditable)
-        self.daily_plan_table.setItem(index, 5, item)
-
-        # Start, button
-        qb = QPushButton('Start')
-        #~ qb.setCheckable(True)
-        qb.clicked.connect(functools.partial(self.start_session2, qb))
-        self.daily_plan_table.setCellWidget(index, 6, qb)
-        
-        # New perf, read only
-        item = QTableWidgetItem('-')
-        item.setFlags(item.flags() ^ QtCore.Qt.ItemIsEditable)
-        self.daily_plan_table.setItem(index, 7, item)
-        
-        # New pipe, text box
-        item = QTableWidgetItem('-')
-        self.daily_plan_table.setItem(index, 8, item)
-        
-        item = QTableWidgetItem('')
-        self.daily_plan_table.setItem(index, 9, item)
-        # Remove, button
-        rmvButton = QPushButton('Remove')
-        self.daily_plan_table.setCellWidget(index, 10, rmvButton)
-        self.daily_plan_table.setItem(index, 10, QTableWidgetItem(''))
-        #Necessary to keep track of changing index
-        persindex = QPersistentModelIndex(self.daily_plan_table.model().index(index, 10))
-
-        rmvButton.clicked.connect(functools.partial(self.removeRow, persindex))
-
-
-    def setRowColor(self, row, color):
-        for col in range(self.daily_plan_table.columnCount()):
-            self.daily_plan_table.item(row, col).setBackground(QBrush(QColor(color)))
-
 
     def start_session(self, row):
         """Collect data from row and pass to start session"""
@@ -294,15 +165,6 @@ class MyApp(QtGui.QMainWindow, Ui_MainWindow):
             recent_weight=str(self.daily_plan_table.item(row, 1).text()),
             recent_pipe=str(self.daily_plan_table.item(row, 4).text()),
         )
-
-        #~ # Jason's threading fix
-        #~ mouse=str(self.daily_plan_table.item(row, 0).text())
-        #~ board=str(self.daily_plan_table.cellWidget(row, 3).currentText())
-        #~ box=str(self.daily_plan_table.cellWidget(row, 2).currentText())
-
-        #~ #Use threading so process doesn't interrupt rest of gui
-        #~ proc = threading.Thread(target=self.call_external, args=(mouse, board, box, row))
-        #~ proc.start()
 
     def start_session2(self, row_qb):
         """Start the session associated with the push button for this row.
@@ -319,41 +181,6 @@ class MyApp(QtGui.QMainWindow, Ui_MainWindow):
         
         # Extract the mouse, board, box from this row
         self.start_session(session_row)
-
-
-    def call_external(self, mouse, board, box, row):
-        """This is intended to be called in a thread"""
-        print mouse, board, box
-
-        user_input = {'mouse': mouse, 'board': board, 'box': box}
-        sandbox_paths = ArduFSM.Runner.Sandbox.create_sandbox(
-            user_input, os.path.expanduser('~/sandbox_root'))
-
-        #Green indicates process is running
-        self.setRowColor(row, 'green')
-
-        #Track successful compilation
-        success = True
-        try:
-            ArduFSM.Runner.start_runner_cli.main(mouse=mouse, board=board, box=box, sandbox_paths=sandbox_paths)
-        except :
-            #Yellow means arduino code didn't compile?
-            self.setRowColor(row, 'yellow')
-            success = False
-            raise 
-        finally:
-            if success:
-                sandbox_path = sandbox_paths['sandbox']
-                saved_filename = sandbox_path + '-saved'
-
-                #Look for saved version of sandbox every 4 seconds
-                while not os.path.exists(saved_filename):
-                    time.sleep(4)
-
-                #Red indicates process completion
-                self.setRowColor(row, 'red')
-
-                print "Session recorded in {} completed".format(sandbox_path)
     
     def move_row(self, old_row, new_row):
         """Move data from old_row to new_row
@@ -408,60 +235,6 @@ class MyApp(QtGui.QMainWindow, Ui_MainWindow):
         row = self.daily_plan_table.currentRow()        
         if row > 0:
             self.move_row(row + 1, row - 1)
-    
-    def save_notes(self):
-        today = datetime.date.today().strftime('%Y-%m-%d')
-        notesfile = open("./notes/notes-%s" % (today), "w")
-        text = self.notesWindow.toPlainText()
-        notesfile.write(text)
-
-        notesfile.close()
-
-
-        self.write_table_to_csv()
-
-    def read_notes(self):
-        today = datetime.date.today().strftime('%Y-%m-%d')
-        path = "./notes/notes-%s" % (today)
-        if os.path.exists(path):
-            self.notesWindow.setPlainText(open(path, 'r').read())
-
-    def write_table_to_csv(self):
-        
-        today = datetime.date.today().strftime('%Y-%m-%d')
-        path = "./history/history-%s.csv" % (today)
-
-        restricted_columns = [6, 10]
-        with open(path, 'w') as stream:
-            writer = csv.writer(stream)
-            
-            header = []
-            for col in range(self.daily_plan_table.columnCount()):
-                if col not in restricted_columns:
-                    colHeader = self.daily_plan_table.horizontalHeaderItem(col)
-                    header.append(colHeader.text())
-            
-            writer.writerow(header)
-
-
-            for row in range(self.daily_plan_table.rowCount()):
-                rowdata = []
-                for col in range(self.daily_plan_table.columnCount()):
-                    if col not in restricted_columns:
-
-                        widget = self.daily_plan_table.cellWidget(row, col)
-                        if widget:
-                            text = widget.currentText()
-                        else:
-                            item = self.daily_plan_table.item(row, col)
-                            text = item.text()
-
-                        rowdata.append(text)
-
-                writer.writerow(rowdata)
-    
-
-
 
 
 class Command(NoArgsCommand):
@@ -470,42 +243,6 @@ class Command(NoArgsCommand):
         window = MyApp()
         window.show()
         sys.exit(app.exec_())
-
-
-
-class DateDialog(QDialog):
-    def __init__(self, startDate, parent = None):
-        super(DateDialog, self).__init__(parent)
-
-        layout = QVBoxLayout(self)
-
-        # nice widget for editing the date
-        self.dateEdit = QDateEdit(self)
-        self.dateEdit.setCalendarPopup(True)
-        self.dateEdit.setDate(startDate)
-        self.dateEdit.setMaximumDate(QDate.currentDate())
-        layout.addWidget(self.dateEdit)
-
-        # OK and Cancel buttons
-        buttons = QDialogButtonBox(
-            QDialogButtonBox.Ok | QDialogButtonBox.Cancel,
-            Qt.Horizontal, self)
-        buttons.accepted.connect(self.accept)
-        buttons.rejected.connect(self.reject)
-        layout.addWidget(buttons)
-        
-
-    # get current date and time from the dialog
-    def getSelectedDate(self):
-        return self.dateEdit.date()
-
-    # static method to create the dialog and return (date, time, accepted)
-    @staticmethod
-    def getDate(startDate, parent = None):
-        dialog = DateDialog(startDate, parent)
-        result = dialog.exec_()
-        date = dialog.getSelectedDate()
-        return (date, result == QDialog.Accepted)
 
 
 if __name__ == "__main__":
