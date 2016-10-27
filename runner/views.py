@@ -75,6 +75,9 @@ def rewards_plot(request):
     f.subplots_adjust(top=0.95, bottom=.1, hspace=.6)
     f.set_facecolor('w')
 
+    min_water_limit = 4
+    max_water_limit = 6
+
     for box, ax in zip(boxes, axes):
         
         #Get all sessions within the past 60 days that the box owns
@@ -94,21 +97,24 @@ def rewards_plot(request):
             left_color = 'b' if (left_volume >= 3.5).all() and (left_volume <= 6.5).all() else 'r'
             right_color = 'g' if (left_volume >= 3.5).all() and (left_volume <= 6.5).all() else 'r'
 
-            ax.plot(left_volume, '-o', color=left_color)
-            ax.plot(right_volume, '--s', color=right_color)
+
+            ax.plot(left_volume, '-o', color='b')
+            ax.plot(right_volume, '-s', color='g')
 
            
-            
             ax.set_xticks(range(len(volumes)))
-            
             labels = volumes.index.format(formatter = lambda x: x.strftime('%m-%d'))
             ax.set_xticklabels(labels, rotation=45, size='medium')
+
+            ax.axhline(min_water_limit, color='r', linestyle='--')
+            ax.axhline(max_water_limit, color='r', linestyle='--')
 
             
 
             ax.set_ylabel('Volume released (uL)')
-            ax.set_title(box.name)
-            ax.legend(["Left Water Consumption", "Right Water Consumption"], loc='lower right', fontsize='medium')
+            title = "{} (Blue = Left Pipe, Green = Right Pipe)".format(box.name)
+            ax.set_title(title)
+            # ax.legend(["Left Water Consumption", "Right Water Consumption"], loc='lower right', fontsize='medium')
 
 
 
