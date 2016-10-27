@@ -71,17 +71,18 @@ def rewards_plot(request):
     f = Figure(figsize=(12, 20), dpi=80)
 
     # Set up figure dimensions
-    axes = [f.add_subplot(len(boxes), 1, n+1) for n in range(len(boxes))]
-    f.subplots_adjust(top=0.95, bottom=.1, hspace=.6)
+
+    f.set_tight_layout(True)
+    # f.subplots_adjust(top=0.95, bottom=.1, hspace=.6)
     f.set_facecolor('w')
 
     min_water_limit = 4
     max_water_limit = 6
 
-    for box, ax in zip(boxes, axes):
+    for i, box in enumerate(boxes):
         
         #Get all sessions within the past 60 days that the box owns
-        box_sessions = Session.objects.filter(box=box, date_time_start__gte = date.today() - timedelta(days=60))
+        box_sessions = Session.objects.filter(box=box, date_time_start__gte = date.today() - timedelta(days=30))
         if len(box_sessions) > 0:
             sessions_by_date = pandas.DataFrame.from_records(box_sessions.values())[["date_time_start", "user_data_left_valve_mean", "user_data_right_valve_mean"]].dropna()
             
@@ -97,6 +98,8 @@ def rewards_plot(request):
             left_color = 'b' if (left_volume >= 3.5).all() and (left_volume <= 6.5).all() else 'r'
             right_color = 'g' if (left_volume >= 3.5).all() and (left_volume <= 6.5).all() else 'r'
 
+
+            ax = f.add_subplot(len(boxes), 1, i+1)
 
             ax.plot(left_volume, '-o', color='b')
             ax.plot(right_volume, '-s', color='g')
