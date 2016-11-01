@@ -66,37 +66,44 @@ def weight_plot(request):
     return response
 
 def rewards_plot(request):
-    
+    """Plots the reward size for each box over days"""
+    # Get all the boxes
     boxes = Box.objects.all()
+    
+    # Create a matplotlib figure to plot into
     f = Figure(figsize=(12, 20), dpi=80)
-
-    # Set up figure dimensions
-
     f.set_tight_layout(True)
-    # f.subplots_adjust(top=0.95, bottom=.1, hspace=.6)
     f.set_facecolor('w')
 
+    # Horizontal bars will be plotted here to show the normal bounds
     min_water_limit = 4
     max_water_limit = 6
 
+    # Iterate over boxes
     for i, box in enumerate(boxes):
-        
         #Get all sessions within the past 60 days that the box owns
-        box_sessions = Session.objects.filter(box=box, date_time_start__gte = date.today() - timedelta(days=30))
+        box_sessions = Session.objects.filter(box=box, 
+            date_time_start__gte = date.today() - timedelta(days=30))
         if len(box_sessions) > 0:
-            sessions_by_date = pandas.DataFrame.from_records(box_sessions.values())[["date_time_start", "user_data_left_valve_mean", "user_data_right_valve_mean"]].dropna()
+            sessions_by_date = pandas.DataFrame.from_records(
+                box_sessions.values())[[
+                "date_time_start", "user_data_left_valve_mean", 
+                "user_data_right_valve_mean"]].dropna()
             
-            sessions_by_date.loc[:, "date_start"] = [dt.date() for dt in sessions_by_date["date_time_start"]]
+            sessions_by_date.loc[:, "date_start"] = [
+                dt.date() for dt in sessions_by_date["date_time_start"]]
             
-            #Average the water consumption values by date
+            # Average the water consumption values by date
             volumes = sessions_by_date.groupby('date_start').aggregate(np.mean)
 
             left_volume = volumes["user_data_left_valve_mean"].values * 1000
             right_volume = volumes["user_data_right_valve_mean"].values *1000
 
-            #Warn user with different color plot if volume is out of desired range
-            left_color = 'b' if (left_volume >= 3.5).all() and (left_volume <= 6.5).all() else 'r'
-            right_color = 'g' if (left_volume >= 3.5).all() and (left_volume <= 6.5).all() else 'r'
+            # Warn user with different color plot if volume is out of range
+            left_color = ('b' if (left_volume >= 3.5).all() and 
+                (left_volume <= 6.5).all() else 'r'
+            right_color = ('g' if (left_volume >= 3.5).all() and 
+                (left_volume <= 6.5).all() else 'r'
 
 
             ax = f.add_subplot(len(boxes), 1, i+1)
@@ -106,7 +113,8 @@ def rewards_plot(request):
 
            
             ax.set_xticks(range(len(volumes)))
-            labels = volumes.index.format(formatter = lambda x: x.strftime('%m-%d'))
+            labels = volumes.index.format(
+                formatter = lambda x: x.strftime('%m-%d'))
             ax.set_xticklabels(labels, rotation=45, size='medium')
 
             ax.axhline(min_water_limit, color='r', linestyle='--')
@@ -117,7 +125,6 @@ def rewards_plot(request):
             ax.set_ylabel('Volume released (uL)')
             title = "{} (Blue = Left Pipe, Green = Right Pipe)".format(box.name)
             ax.set_title(title)
-            # ax.legend(["Left Water Consumption", "Right Water Consumption"], loc='lower right', fontsize='medium')
 
 
 
@@ -126,10 +133,5 @@ def rewards_plot(request):
     canvas.print_png(response)
     return response
 
-
-
-# for box, ax
-# for session in Session.objects.filter(box=box, date_time_start__lte=datetime.today)
-    
 
 
