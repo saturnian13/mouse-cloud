@@ -79,6 +79,12 @@ def rewards_plot(request):
     min_water_limit = 4
     max_water_limit = 6
 
+    # Values outside this range are ignored because they are usually
+    # mistakes
+    ignore_lower_thresh = .0005
+    ignore_upper_thresh = .1
+    
+
     # Iterate over boxes
     for i, box in enumerate(boxes):
         # Get all sessions within the past 30 days that the box owns
@@ -96,6 +102,15 @@ def rewards_plot(request):
             # Convert to date object
             sessions_by_date.loc[:, "date_start"] = [
                 dt.date() for dt in sessions_by_date["date_time_start"]]
+            
+            # Drop the ones outside the range
+            colnames = [
+                'user_data_left_valve_mean', 
+                'user_data_right_valve_mean']
+            sessions_by_date = sessions_by_date[
+                (sessions_by_date[colnames].min(1) > ignore_lower_thresh) &
+                (sessions_by_date[colnames].max(1) < ignore_upper_thresh)
+            ]
             
             # Average the water consumption values by date
             volumes = sessions_by_date.groupby('date_start').aggregate(np.mean)
