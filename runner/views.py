@@ -81,53 +81,50 @@ def rewards_plot(request):
 
     # Iterate over boxes
     for i, box in enumerate(boxes):
-        #Get all sessions within the past 60 days that the box owns
+        # Get all sessions within the past 30 days that the box owns
         box_sessions = Session.objects.filter(box=box, 
             date_time_start__gte = date.today() - timedelta(days=30))
+        
+        # Only display it if there are any sessions
         if len(box_sessions) > 0:
+            # Extract the calculated reward durations
             sessions_by_date = pandas.DataFrame.from_records(
                 box_sessions.values())[[
                 "date_time_start", "user_data_left_valve_mean", 
                 "user_data_right_valve_mean"]].dropna()
             
+            # Convert to date object
             sessions_by_date.loc[:, "date_start"] = [
                 dt.date() for dt in sessions_by_date["date_time_start"]]
             
             # Average the water consumption values by date
             volumes = sessions_by_date.groupby('date_start').aggregate(np.mean)
 
+            # Convert to uL
             left_volume = volumes["user_data_left_valve_mean"].values * 1000
             right_volume = volumes["user_data_right_valve_mean"].values *1000
 
-            # Warn user with different color plot if volume is out of range
-            left_color = ('b' if (left_volume >= 3.5).all() and 
-                (left_volume <= 6.5).all() else 'r'
-            right_color = ('g' if (left_volume >= 3.5).all() and 
-                (left_volume <= 6.5).all() else 'r'
-
-
+            # Add axis and plot the volumes
             ax = f.add_subplot(len(boxes), 1, i+1)
-
             ax.plot(left_volume, '-o', color='b')
             ax.plot(right_volume, '-s', color='g')
-
-           
+            
+            # Ticklabels for the dates
             ax.set_xticks(range(len(volumes)))
             labels = volumes.index.format(
                 formatter = lambda x: x.strftime('%m-%d'))
             ax.set_xticklabels(labels, rotation=45, size='medium')
 
+            # Show normal water range
             ax.axhline(min_water_limit, color='r', linestyle='--')
             ax.axhline(max_water_limit, color='r', linestyle='--')
 
-            
-
+            # Labels
             ax.set_ylabel('Volume released (uL)')
             title = "{} (Blue = Left Pipe, Green = Right Pipe)".format(box.name)
             ax.set_title(title)
 
-
-
+    # Print to png
     canvas = FigureCanvas(f)
     response = HttpResponse(content_type='image/png')
     canvas.print_png(response)
