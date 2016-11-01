@@ -133,6 +133,9 @@ def rewards_plot(request):
             # Show normal water range
             ax.axhline(min_water_limit, color='r', linestyle='--')
             ax.axhline(max_water_limit, color='r', linestyle='--')
+            
+            # Consistent ylims
+            ax.set_ylims((2, 8))
 
             # Labels
             ax.set_ylabel('Volume released (uL)')
