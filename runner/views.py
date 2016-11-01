@@ -135,7 +135,7 @@ def rewards_plot(request):
             ax.axhline(max_water_limit, color='r', linestyle='--')
             
             # Consistent ylims
-            ax.set_ylims((2, 8))
+            ax.set_ylim((2, 8))
 
             # Labels
             ax.set_ylabel('Volume released (uL)')
