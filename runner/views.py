@@ -26,8 +26,8 @@ tz = pytz.timezone('US/Eastern')
 def weight_plot(request):
     cohorts = [
         ['KM83', 'KM84', 'KM85', 'KM86',],
-        ['KM87', 'KF89', 'KF90', 'KM91', 'KF94', 'KF95',]
-        ['KF98', 'KF99', 'KM100', 'KM101', 'KM102',]
+        ['KM87', 'KF89', 'KF90', 'KM91', 'KF94', 'KF95',],
+        ['KF98', 'KF99', 'KM100', 'KM101', 'KM102',],
     ]
 
     f = Figure(figsize=(12, 4 * len(cohorts)), dpi=80)
