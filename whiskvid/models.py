@@ -21,8 +21,8 @@ class VideoSession(models.Model):
     bsession = models.ForeignKey(runner.models.Session)
 
     # Parameters of the video
-    frame_height = models.IntField(null=True, blank=True)
-    frame_width = models.IntField(null=True, blank=True)
+    frame_height = models.IntegerField(null=True, blank=True)
+    frame_width = models.IntegerField(null=True, blank=True)
     
     # Should probably come from bsession
     # But in case it is different for some reason, allow override here
@@ -50,15 +50,15 @@ class VideoSession(models.Model):
     
     ## Parameters
     # Relating to edging
-    param_edge_lumthresh = models.IntField(null=True, blank=True)
-    param_edge_x0 = models.IntField(null=True, blank=True)
-    param_edge_x1 = models.IntField(null=True, blank=True)
-    param_edge_y0 = models.IntField(null=True, blank=True)
-    param_edge_y1 = models.IntField(null=True, blank=True)
+    param_edge_lumthresh = models.IntegerField(null=True, blank=True)
+    param_edge_x0 = models.IntegerField(null=True, blank=True)
+    param_edge_x1 = models.IntegerField(null=True, blank=True)
+    param_edge_y0 = models.IntegerField(null=True, blank=True)
+    param_edge_y1 = models.IntegerField(null=True, blank=True)
     
     # Relating to follicle
-    param_fol_x0 = models.IntField(null=True, blank=True)
-    param_fol_x1 = models.IntField(null=True, blank=True)
-    param_fol_y0 = models.IntField(null=True, blank=True)
-    param_fol_y1 = models.IntField(null=True, blank=True)    
+    param_fol_x0 = models.IntegerField(null=True, blank=True)
+    param_fol_x1 = models.IntegerField(null=True, blank=True)
+    param_fol_y0 = models.IntegerField(null=True, blank=True)
+    param_fol_y1 = models.IntegerField(null=True, blank=True)    
     
