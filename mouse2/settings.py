@@ -69,6 +69,7 @@ DEBUG = False
 
 INSTALLED_APPS = [
     'runner.apps.RunnerConfig',
+    'whiskvid.apps.WhiskvidConfig',
     'crispy_forms',
     'suit',
     'django.contrib.admin',
