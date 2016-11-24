@@ -19,3 +19,46 @@ class VideoSession(models.Model):
     # Probably this would be handled by creating redundant
     # VideoSessions
     bsession = models.ForeignKey(runner.models.Session)
+
+    # Parameters of the video
+    frame_height = models.IntField(null=True, blank=True)
+    frame_width = models.IntField(null=True, blank=True)
+    
+    # Should probably come from bsession
+    # But in case it is different for some reason, allow override here
+    bsession_logfilename = models.CharField(max_length=1000, blank=True)
+    
+    ## Data files
+    # These are *relative to the session directory*
+    all_edges_filename = models.CharField(max_length=1000, blank=True)
+    edge_summary_filename = models.CharField(max_length=1000, blank=True)
+    tac_filename = models.CharField(max_length=1000, blank=True)
+    whiskers_table_filename = models.CharField(max_length=1000, blank=True)
+
+    # The "raw video", or monitor video
+    monitor_video = models.CharField(max_length=1000, blank=True)
+    
+    # Original matfiles
+    # This one is not relative to anything
+    matfile_directory = models.CharField(max_length=1000, blank=True)
+    
+    # Sync
+    fit_b2v0 = models.FloatField(null=True, blank=True)
+    fit_b2v1 = models.FloatField(null=True, blank=True)
+    fit_v2b0 = models.FloatField(null=True, blank=True)
+    fit_v2b1 = models.FloatField(null=True, blank=True)
+    
+    ## Parameters
+    # Relating to edging
+    param_edge_lumthresh = models.IntField(null=True, blank=True)
+    param_edge_x0 = models.IntField(null=True, blank=True)
+    param_edge_x1 = models.IntField(null=True, blank=True)
+    param_edge_y0 = models.IntField(null=True, blank=True)
+    param_edge_y1 = models.IntField(null=True, blank=True)
+    
+    # Relating to follicle
+    param_fol_x0 = models.IntField(null=True, blank=True)
+    param_fol_x1 = models.IntField(null=True, blank=True)
+    param_fol_y0 = models.IntField(null=True, blank=True)
+    param_fol_y1 = models.IntField(null=True, blank=True)    
+    
