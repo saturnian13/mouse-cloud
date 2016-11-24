@@ -1,8 +1,8 @@
 from django.contrib import admin
-import whiskvid.models
+import whisk_video.models
 
 # Register your models here.
 class VideoSessionAdmin(admin.ModelAdmin):
     list_display = ['name', 'bsession',]
 
-admin.site.register(whiskvid.models.VideoSession, VideoSessionAdmin)
+admin.site.register(whisk_video.models.VideoSession, VideoSessionAdmin)
