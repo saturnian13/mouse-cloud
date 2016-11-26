@@ -70,6 +70,7 @@ DEBUG = False
 INSTALLED_APPS = [
     'runner.apps.RunnerConfig',
     'whisk_video.apps.Whisk_videoConfig',
+    'neural_sessions.apps.NeuralSessionsConfig',
     'crispy_forms',
     'suit',
     'django.contrib.admin',
