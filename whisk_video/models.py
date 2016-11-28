@@ -35,6 +35,10 @@ class VideoSession(models.Model):
     edge_summary_filename = models.CharField(max_length=1000, blank=True)
     tac_filename = models.CharField(max_length=1000, blank=True)
     whiskers_table_filename = models.CharField(max_length=1000, blank=True)
+    clustered_tac_filename = models.CharField(max_length=1000, blank=True)
+    colorized_whisker_ends_filename = models.CharField(
+        max_length=1000, blank=True)
+    contacts_summary_filename = models.CharField(max_length=1000, blank=True)
 
     # The "raw video", or monitor video
     monitor_video = models.CharField(max_length=1000, blank=True)
