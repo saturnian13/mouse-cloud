@@ -4,9 +4,10 @@ import whisk_video.models
 
 # Register your models here.
 class VideoSessionAdmin(admin.ModelAdmin):
-    list_display = ['name', 'bsession',
+    list_display = ['name', 'bsession', 'sync_isnotnull',
         'whiskers_isnotnull', 'edges_isnotnull', 'tac_isnotnull',
-        'sync_isnotnull',
+        'clustered_tac_isnotnull', 'colorized_isnotnull',
+        'cs_isnotnull',
     ]
     
     def whiskers_isnotnull(self, obj):
@@ -26,6 +27,24 @@ class VideoSessionAdmin(admin.ModelAdmin):
         return val is not None and val != ''
     tac_isnotnull.short_description = 'tac'
     tac_isnotnull.boolean = True
+
+    def clustered_tac_isnotnull(self, obj):
+        val = obj.clustered_tac_filename
+        return val is not None and val != ''
+    clustered_tac_isnotnull.short_description = 'clustered'
+    clustered_tac_isnotnull.boolean = True
+
+    def colorized_isnotnull(self, obj):
+        val = obj.colorized_whisker_ends_filename
+        return val is not None and val != ''
+    colorized_isnotnull.short_description = 'colorized'
+    colorized_isnotnull.boolean = True
+
+    def cs_isnotnull(self, obj):
+        val = obj.contacts_summary_filename
+        return val is not None and val != ''
+    cs_isnotnull.short_description = 'cs'
+    cs_isnotnull.boolean = True
     
     def sync_isnotnull(self, obj):
         return not np.any(np.isnan([
