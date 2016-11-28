@@ -67,3 +67,5 @@ class VideoSession(models.Model):
     param_fol_y0 = models.IntegerField(null=True, blank=True)
     param_fol_y1 = models.IntegerField(null=True, blank=True)    
     
+    def __str__(self):
+        return str(self.name)
