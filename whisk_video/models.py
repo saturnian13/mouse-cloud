@@ -18,11 +18,12 @@ class VideoSession(models.Model):
     # Not possible to link to multiple behavioral sessions
     # Probably this would be handled by creating redundant
     # VideoSessions
-    bsession = models.ForeignKey(runner.models.Session)
+    bsession = models.ForeignKey(runner.models.Session, blank=True, null=True)
 
     # Parameters of the video
     frame_height = models.IntegerField(null=True, blank=True)
     frame_width = models.IntegerField(null=True, blank=True)
+    frame_rate = models.FloatField(null=True, blank=True)
     
     # Should probably come from bsession
     # But in case it is different for some reason, allow override here
