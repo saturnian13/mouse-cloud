@@ -55,6 +55,9 @@ class VideoSession(models.Model):
     fit_v2b0 = models.FloatField(null=True, blank=True)
     fit_v2b1 = models.FloatField(null=True, blank=True)
     
+    ## Other notes
+    whisker_colors = models.CharField(max_length=100, blank=True)
+    
     ## Parameters
     # Relating to edging
     param_edge_lumthresh = models.IntegerField(null=True, blank=True)
