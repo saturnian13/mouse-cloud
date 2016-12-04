@@ -57,8 +57,9 @@ class VideoSession(models.Model):
     
     ## Other notes
     whisker_colors = models.CharField(max_length=100, blank=True)
+    param_face_choices = ((0, 'left'), (1, 'right'), (2, 'top'), (3, 'bottom'),)
     param_face_side = models.IntegerField(null=True, blank=True,
-        choices=((0, 'left'), (1, 'right'), (2, 'top'), (3, 'bottom'),),
+        choices=param_face_choices,
     )
     
     ## Parameters
