@@ -57,14 +57,25 @@ class VideoSession(models.Model):
     
     ## Other notes
     whisker_colors = models.CharField(max_length=100, blank=True)
+    param_face_side = models.IntegerField(null=True, blank=True,
+        choices=((0, 'left'), (1, 'right'), (2, 'top'), (3, 'bottom'),),
+    )
     
     ## Parameters
     # Relating to edging
     param_edge_lumthresh = models.IntegerField(null=True, blank=True)
+    param_edge_split_iters = models.IntegerField(null=True, blank=True,
+        default=5)
+
     param_edge_x0 = models.IntegerField(null=True, blank=True)
     param_edge_x1 = models.IntegerField(null=True, blank=True)
     param_edge_y0 = models.IntegerField(null=True, blank=True)
     param_edge_y1 = models.IntegerField(null=True, blank=True)
+
+    param_edge_crop_x0 = models.IntegerField(null=True, blank=True)
+    param_edge_crop_x1 = models.IntegerField(null=True, blank=True)
+    param_edge_crop_y0 = models.IntegerField(null=True, blank=True)
+    param_edge_crop_y1 = models.IntegerField(null=True, blank=True)
     
     # Relating to follicle
     param_fol_x0 = models.IntegerField(null=True, blank=True)
