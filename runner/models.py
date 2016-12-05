@@ -34,6 +34,17 @@ class Mouse(models.Model):
     default_board = models.CharField(max_length=50, null=True, blank=True)
     default_box = models.CharField(max_length=50, null=True, blank=True)
 
+    # Make this an autoslugfield so we can order by it
+    @property
+    def name_number(self):
+        """Return the mouse's number: int(digits in the name)"""
+        # Keep the ints
+        int_s = filter(lambda c: c in '0123456789', self.name)
+        return int(int_s)
+
+    class Meta:
+        ordering = ['name']
+
     def __str__(self):
         return str(self.name)
 
