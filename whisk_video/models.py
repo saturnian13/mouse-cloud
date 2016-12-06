@@ -24,6 +24,13 @@ class VideoSession(models.Model):
     frame_height = models.IntegerField(null=True, blank=True)
     frame_width = models.IntegerField(null=True, blank=True)
     frame_rate = models.FloatField(null=True, blank=True)
+    lens_fstop = models.FloatField(null=True, blank=True)
+    imaq_exposure_time = models.FloatField(null=True, blank=True)
+    imaq_digital_gain = models.IntegerField(null=True, blank=True)
+    imaq_digital_offset = models.IntegerField(null=True, blank=True)
+    
+    # Notes
+    notes = models.CharField(max_length=500, blank=True)
     
     # Should probably come from bsession
     # But in case it is different for some reason, allow override here
