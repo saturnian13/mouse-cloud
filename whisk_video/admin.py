@@ -1,4 +1,5 @@
 import numpy as np
+import pandas
 from django.contrib import admin
 import whisk_video.models
 
@@ -53,7 +54,7 @@ class VideoSessionAdmin(admin.ModelAdmin):
     ccs_isnotnull.boolean = True
     
     def sync_isnotnull(self, obj):
-        return not np.any(np.isnan([
+        return not np.any(pandas.isnull([
             obj.fit_v2b0, obj.fit_v2b1, obj.fit_b2v0, obj.fit_b2v1]))
 
     sync_isnotnull.short_description = 'sync'
