@@ -30,6 +30,9 @@ class BehaviorCage(models.Model):
 class Mouse(models.Model):
     """Mouse, with demographic and training info.
     
+    'name' is the training name
+    'husbandry_name' is the 'name' field in the main colony database
+    
     Some fields are copied in from the main colony database.
     Others relate to how it should be trained.
     Others relate to how its performance should be plotted.
@@ -48,7 +51,7 @@ class Mouse(models.Model):
     genotype = models.CharField(max_length=200, blank=True)
 
     # Extra demographic information for behavior
-    training_name = models.CharField(max_length=20, null=True, blank=True)
+    husbandry_name = models.CharField(max_length=20, null=True, blank=True)
     headplate_color = models.CharField(max_length=10, null=True, blank=True)
     
     # This determines whether to include this mouse in reports, and maybe
