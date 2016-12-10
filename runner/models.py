@@ -65,15 +65,15 @@ class Mouse(models.Model):
     cage = models.ForeignKey(BehaviorCage, null=True, blank=True)
     
     # Python params
-    stimulus_set = models.CharField(max_length=50)
-    step_first_rotation = models.IntegerField()
-    timeout = models.IntegerField(null=True, blank=True)
-    scheduler = models.CharField(max_length=50)
-    max_rewards_per_trial = models.IntegerField(default=1)
+    stimulus_set = models.CharField(max_length=50, blank=True)
+    step_first_rotation = models.IntegerField(null=True, blank=True, default=50)
+    timeout = models.IntegerField(null=True, blank=True, default=2000)
+    scheduler = models.CharField(max_length=50, blank=True)
+    max_rewards_per_trial = models.IntegerField(null=True, blank=True, default=1)
     
     # build params
-    protocol_name = models.CharField(max_length=50)
-    script_name = models.CharField(max_length=50)
+    protocol_name = models.CharField(max_length=50, blank=True)
+    script_name = models.CharField(max_length=50, blank=True)
     default_board = models.CharField(max_length=50, null=True, blank=True)
     default_box = models.CharField(max_length=50, null=True, blank=True)
 
