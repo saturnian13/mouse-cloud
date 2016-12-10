@@ -12,14 +12,54 @@ need to be strings, but perhaps it would be better to have allow other types
 
 from __future__ import unicode_literals
 
+import datetime
 from django.db import models
 
 def get_latest_daily_plan():
     return None
 
 
+class BehaviorCage(models.Model):
+    """Cage for holding mice outside of barrier"""
+    name = models.CharField(max_length=20, unique=True)
+    label_color = models.CharField(max_length=20, null=True, blank=True)
+
+    def __str__(self):
+        return self.name
+
 class Mouse(models.Model):
+    """Mouse, with demographic and training info.
+    
+    Some fields are copied in from the main colony database.
+    Others relate to how it should be trained.
+    Others relate to how its performance should be plotted.
+    """
+    # Demographic information to be imported from main colony db
     name = models.CharField(max_length=20)
+    SEX_CHOICES = ((0, 'M'), (1, 'F'), (2, '?'))
+    sex = models.IntegerField(choices=SEX_CHOICES, default=2)
+    dob = models.DateField(blank=True, null=True)
+    notes = models.CharField(max_length=100, blank=True)    
+    sack_date = models.DateField('sac date', blank=True, null=True)
+    
+    # We copy these data as a string, rather than creating a cascade
+    # of objects. So the data need to be manually synced but not the
+    # object model.
+    genotype = models.CharField(max_length=200, blank=True)
+
+    # Extra demographic information for behavior
+    training_name = models.CharField(max_length=20, null=True, blank=True)
+    headplate_color = models.CharField(max_length=10, null=True, blank=True)
+    
+    # This determines whether to include this mouse in reports, and maybe
+    # whether the Runner should include it in the training plan.
+    in_training = models.BooleanField(default=False)
+    
+    # This determine the ones to plot it with in the reports
+    training_cohort = models.IntegerField(null=True, blank=True)
+    
+    # The mouse's cage, used for printing labels
+    cage = models.ForeignKey(BehaviorCage, null=True, blank=True)
     
     # Python params
     stimulus_set = models.CharField(max_length=50)
@@ -47,6 +87,17 @@ class Mouse(models.Model):
 
     def __str__(self):
         return str(self.name)
+
+    @property
+    def age(self):
+        if self.dob is None:
+            return None
+        today = datetime.date.today()
+        return (today - self.dob).days
+
+    @property
+    def sacked(self):
+        return self.sack_date is not None
 
 class Box(models.Model):
     """Hardware info about individual boxes"""

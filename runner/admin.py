@@ -1,6 +1,6 @@
 from django.contrib import admin
 from .models import Mouse, Box, Board, ArduinoProtocol, \
-    PythonProtocol, Session
+    PythonProtocol, Session, BehaviorCage
 from suit.admin import SortableModelAdmin
 
 # Register your models here.
@@ -46,5 +46,6 @@ admin.site.register(Mouse)
 admin.site.register(Box, BoxAdmin)
 admin.site.register(Board, BoardAdmin)
 admin.site.register(Session, SessionAdmin)
+admin.site.register(BehaviorCage)
 admin.site.register(ArduinoProtocol)
 admin.site.register(PythonProtocol)
