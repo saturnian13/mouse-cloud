@@ -38,11 +38,16 @@ class SessionAdmin(admin.ModelAdmin):
     list_filter = ['mouse', 'board', 'box']
     ordering = ['-date_time_start']
 
+class MouseAdmin(admin.ModelAdmin):
+    list_display = ['husbandry_name', 'name', 'sex', 'dob', 'notes',
+        'sack_date', 'genotype', 'headplate_color', 'cage',
+    ]
+
 class DailyPlanAdmin(admin.ModelAdmin):
     list_display = ['date_time_start']
     inlines = [SessionInline]
 
-admin.site.register(Mouse)
+admin.site.register(Mouse, MouseAdmin)
 admin.site.register(Box, BoxAdmin)
 admin.site.register(Board, BoardAdmin)
 admin.site.register(Session, SessionAdmin)
