@@ -39,9 +39,12 @@ class SessionAdmin(admin.ModelAdmin):
     ordering = ['-date_time_start']
 
 class MouseAdmin(admin.ModelAdmin):
-    list_display = ['husbandry_name', 'name', 'sex', 'dob', 'notes',
-        'sack_date', 'genotype', 'headplate_color', 'cage',
+    list_display = [
+        'husbandry_name', 'name', 'in_training', 'training_cohort', 
+        'dob', 'notes', 'sack_date', 'genotype', 'headplate_color', 'cage',
     ]
+    
+    list_editable = ['in_training', 'training_cohort']
 
 class DailyPlanAdmin(admin.ModelAdmin):
     list_display = ['date_time_start']
