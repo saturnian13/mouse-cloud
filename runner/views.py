@@ -5,8 +5,8 @@ from django.template import RequestContext
 from django.http import HttpResponseRedirect, HttpResponse
 from django.shortcuts import render_to_response
 from .models import Session
-from .models import Box
-
+from .models import Box, Mouse
+import datetime
 import pandas
 from datetime import date, timedelta
 import numpy as np
@@ -20,45 +20,79 @@ from matplotlib.dates import date2num
 import pytz 
 import models
 
-# Hack, see below
-tz = pytz.timezone('US/Eastern')
+# Interpret all times as Eastern
+tz = pytz.timezone('America/New_York')
 
 def weight_plot(request):
-    cohorts = [
-        ['KM84', 'KM85', 'KM86', 'KM87', ],
-        ['KF89', 'KF90', 'KM91', 'KF94', 'KF95',],
-        ['KF98', 'KF99', 'KM100', 'KM101', 'KM102',],
+    # Get cohorts (so we can detect missing data later)
+    qs = Mouse.objects.filter(in_training=True)
+    cohort_df = pandas.DataFrame.from_records(list(qs.values_list(
+        'name', 'training_cohort')), columns=['mouse', 'cohort'])
+    
+    # Replace all missing cohorts with -1
+    cohort_df.loc[cohort_df.cohort.isnull(), 'cohort'] = -1
+    
+    # Group the mice
+    cohort2mouse_names = dict([(cohort, list(ser.values)) 
+        for cohort, ser in cohort_df.groupby('cohort')['mouse']])
+
+    # Extract weights
+    columns = ['date_time_start', 'mouse__name', 'user_data_weight', 
+        'mouse__training_cohort']
+    thresh_date = datetime.date.today() - datetime.timedelta(days=45)
+    qs = Session.objects.filter(
+        mouse__in_training=True, date_time_start__date__gte=thresh_date)
+    weight_df = pandas.DataFrame.from_records(list(qs.values_list(*columns)),
+        columns=columns)
+    weight_df['date'] = weight_df['date_time_start'].apply(
+        lambda dt: dt.astimezone(tz).date())
+
+    # Pivot
+    # In case there are multiple sessions, take the mean
+    piv = weight_df.pivot_table(index='date', 
+        columns=('mouse__training_cohort', 'mouse__name'),
+        values='user_data_weight')
+
+    # Make figure
+    cohort_labels = sorted(cohort2mouse_names.keys())
+    f = Figure(figsize=(12, 4 * len(cohort_labels)), dpi=80)
+    axa = [
+        f.add_subplot(len(cohort_labels), 1, n_cohort + 1) 
+        for n_cohort in range(len(cohort_labels))
     ]
-
-    f = Figure(figsize=(12, 4 * len(cohorts)), dpi=80)
-    axa = [f.add_subplot(len(cohorts), 1, n_cohort + 1) 
-        for n_cohort in range(len(cohorts))]
-
     #~ f, axa = plt.subplots(len(cohorts), 1, figsize=(12, 4 * len(cohorts)), dpi=80)
     f.subplots_adjust(top=.95, bottom=.1, hspace=.4)
     f.set_facecolor('w')
-
-    rec_l = []
-    for session in Session.objects.all():
-        rec_l.append({
-            'mouse': session.mouse.name,
-            'weight': session.user_data_weight,
-            'date': session.date_time_start.astimezone(tz).date(),
-            })
-    df = pandas.DataFrame.from_records(rec_l).dropna()
-    piv = df.pivot_table(index='date', columns='mouse', values='weight')
-    labels = map(str, piv.index)
     
-    for cohort, ax in zip(cohorts, axa):
-        cohort = [mouse for mouse in cohort if mouse in piv.columns]
-        if len(cohort) == 0:
+    # Plot each
+    for cohort_label, ax in zip(cohort_labels, axa):
+        # Get weights for this cohort or display error
+        try:
+            cohort_weights = piv[cohort_label]
+        except KeyError:
+            ax.set_title('missing data from: %s' % ' '.join(
+                cohort2mouse_names[cohort_label]))
             continue
-        ax.plot(piv[cohort].values, marker='s', ls='-')
-        ax.set_xticks(range(len(piv)))
-        labels = piv.index.format(formatter = lambda x: x.strftime('%m-%d'))
+        
+        # Plot
+        ax.plot(cohort_weights.values, marker='s', ls='-')
+        ax.set_ylim((14, 30))
+        
+        # Xticks are the formatted date
+        ax.set_xticks(range(len(cohort_weights)))
+        labels = cohort_weights.index.format(
+            formatter = lambda x: x.strftime('%m-%d'))
         ax.set_xticklabels(labels, rotation=45, size='medium')
-        ax.legend(cohort, loc='lower left', fontsize='medium')
-        ax.set_xlim((len(piv) - 30 - 0.5, len(piv) - .5))        
+        
+        # Legend is the mouse names
+        ax.legend(list(cohort_weights.columns), loc='lower left', 
+            fontsize='medium')
+        
+        # Title any missing mice
+        missing_mice = [mouse for mouse in cohort2mouse_names[cohort_label]
+            if mouse not in cohort_weights.columns]
+        if len(missing_mice) > 0:
+            ax.set_title('missing mice: %r' % missing_mice)
 
     canvas = FigureCanvas(f)
     response = HttpResponse(content_type='image/png')
