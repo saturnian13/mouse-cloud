@@ -9,6 +9,7 @@ class VideoSessionAdmin(admin.ModelAdmin):
         'whiskers_isnotnull', 'edges_isnotnull', 'tac_isnotnull',
         'clustered_tac_isnotnull', 'cs_isnotnull', 
         'colorized_isnotnull', 'ccs_isnotnull',
+        'notes',
     ]
     
     def whiskers_isnotnull(self, obj):
