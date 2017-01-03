@@ -15,10 +15,9 @@ class VideoSessionAdmin(admin.ModelAdmin):
         'notes',
     ]
     
+    # Make the "notes" field a wider editable box
     list_editable = ['notes',]
-
     formfield_overrides = {
-        #~ models.CharField: {'widget': TextInput(attrs={'size':'50'})},
         models.CharField: {'widget': Textarea(attrs={
             'rows':1, 'cols':80, 'style': 'width: 45em;resize: vertical;'})},
     }
