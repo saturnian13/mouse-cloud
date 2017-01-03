@@ -3,6 +3,9 @@ import pandas
 from django.contrib import admin
 import whisk_video.models
 
+from django.forms import TextInput, Textarea
+from django.db import models
+
 # Register your models here.
 class VideoSessionAdmin(admin.ModelAdmin):
     list_display = ['name', 'bsession', 'sync_isnotnull',
@@ -11,6 +14,14 @@ class VideoSessionAdmin(admin.ModelAdmin):
         'colorized_isnotnull', 'ccs_isnotnull',
         'notes',
     ]
+    
+    list_editable = ['notes',]
+
+    formfield_overrides = {
+        #~ models.CharField: {'widget': TextInput(attrs={'size':'50'})},
+        models.CharField: {'widget': Textarea(attrs={
+            'rows':1, 'cols':80, 'style': 'width: 45em;resize: vertical;'})},
+    }
     
     def whiskers_isnotnull(self, obj):
         val = obj.whiskers_table_filename
