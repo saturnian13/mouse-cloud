@@ -8,12 +8,15 @@ from django.db import models
 
 # Register your models here.
 class VideoSessionAdmin(admin.ModelAdmin):
-    list_display = ['name', 'bsession', 'sync_isnotnull',
-        'whiskers_isnotnull', 'edges_isnotnull', 'tac_isnotnull',
+    list_display = ['name', 'bsession', 
+        'whiskers_isnotnull', 'sync_isnotnull',
+        'edges_isnotnull', 'tac_isnotnull',
         'clustered_tac_isnotnull', 'cs_isnotnull', 
         'colorized_isnotnull', 'ccs_isnotnull',
         'notes',
     ]
+    
+    list_filter = ['hide',]
     
     # Make the "notes" field a wider editable box
     list_editable = ['notes',]

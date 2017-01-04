@@ -32,6 +32,9 @@ class VideoSession(models.Model):
     # Notes
     notes = models.CharField(max_length=500, blank=True)
     
+    # Hide it from the admin view
+    hide = models.BooleanField(default=False)
+    
     # Should probably come from bsession
     # But in case it is different for some reason, allow override here
     bsession_logfilename = models.CharField(max_length=1000, blank=True)
