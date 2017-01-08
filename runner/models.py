@@ -298,3 +298,18 @@ class Session(models.Model):
             return 'NA'
     display_right_perf.short_description = 'R perf'
     
+class OptoSession(models.Model):
+    """Parameters for optogenetic stimulation during a behavioral session
+    
+    Seems like this will always be OneToOne with Session. But this is
+    an optional link, in case at some point we link these things differently.
+    """
+    behavioral_session = models.OneToOneField(Session, null=True, blank=True)
+    target = models.CharField(max_length=50, blank=True)
+    start_power = models.FloatField(null=True, blank=True)
+    stop_power = models.FloatField(null=True, blank=True)
+    wavelength = models.FloatField(null=True, blank=True, default=593.5)
+    target_orientation = models.CharField(max_length=50, blank=True)
+    fiber_diameter = models.FloatField(null=True, blank=True)
+    notes = models.TextField(null=True, blank=True)
+    sham = models.NullBooleanField(null=True, blank=True)
