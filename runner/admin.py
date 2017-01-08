@@ -1,6 +1,6 @@
 from django.contrib import admin
 from .models import Mouse, Box, Board, ArduinoProtocol, \
-    PythonProtocol, Session, BehaviorCage
+    PythonProtocol, Session, BehaviorCage, OptoSession
 from suit.admin import SortableModelAdmin
 
 # Register your models here.
@@ -50,10 +50,19 @@ class DailyPlanAdmin(admin.ModelAdmin):
     list_display = ['date_time_start']
     inlines = [SessionInline]
 
+class OptoSessionAdmin(admin.ModelAdmin):
+    model = OptoSession
+    list_display = ['behavioral_session', 'sham', 
+        'target', 'target_orientation',
+        'start_power', 'stop_power', 'notes',
+    ]
+    list_editable = ['notes',]
+
 admin.site.register(Mouse, MouseAdmin)
 admin.site.register(Box, BoxAdmin)
 admin.site.register(Board, BoardAdmin)
 admin.site.register(Session, SessionAdmin)
+admin.site.register(OptoSession, OptoSessionAdmin)
 admin.site.register(BehaviorCage)
 admin.site.register(ArduinoProtocol)
 admin.site.register(PythonProtocol)
