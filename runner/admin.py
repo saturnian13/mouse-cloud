@@ -22,18 +22,29 @@ class SessionInline(admin.TabularInline):
         'irl_param_stimulus_arm',
         )
 
+class OptoSessionInline(admin.StackedInline):
+    """Inlined information about OptoSession in a behavioral Session"""
+    model = OptoSession
+    fields = ('notes', 'sham', 'target', 'target_orientation',
+        'start_power', 'stop_power', 'wavelength', 'fiber_diameter',
+    )
+    
+    # Put it on the opto tab
+    suit_classes = 'suit-tab suit-tab-opto'
+
 class SessionAdmin(admin.ModelAdmin):
     fieldsets = [
-        (None, {
+        ('Session parameters', {
             'classes': ('suit-tab', 'suit-tab-behavior',),
             'fields': ['name', 'mouse', 'board', 'box', 
                 'date_time_start', 'date_time_stop',
+                'python_param_scheduler_name', 'python_param_stimulus_set',
+                'irl_param_stimulus_arm',
             ],
         }),
-        ('More about behavior', {
+        ('User-provided data', {
             'classes': ('suit-tab', 'suit-tab-behavior',),
-            'fields': ['logfile', 'autosketch_path', 'script_path', 'sandbox',
-                'python_param_scheduler_name', 'python_param_stimulus_set',
+            'fields': [
                 'user_data_water_pipe_position_start',
                 'user_data_water_pipe_position_stop',
                 'user_data_left_water_consumption',
@@ -43,13 +54,13 @@ class SessionAdmin(admin.ModelAdmin):
                 'user_data_weight',
             ],
         }),
-        (None, {
-            'classes': ('suit-tab', 'suit-tab-opto',),
-            'fields': [
+        ('Filenames', {
+            'classes': ('suit-tab', 'suit-tab-filenames',),
+            'fields': ['logfile', 'autosketch_path', 'script_path', 'sandbox',
             ],
-        }),
+        }),        
     ]
-    
+
     suit_form_tabs = (
         ('behavior', 'Behavior'),
         ('opto', 'Opto'),
@@ -71,6 +82,8 @@ class SessionAdmin(admin.ModelAdmin):
     
     list_filter = ['mouse', 'board', 'box']
     ordering = ['-date_time_start']
+    
+    inlines = [OptoSessionInline,]
 
 class MouseAdmin(admin.ModelAdmin):
     list_display = [
