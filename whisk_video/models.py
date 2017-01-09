@@ -34,7 +34,7 @@ class VideoSession(models.Model):
     imaq_digital_offset = models.IntegerField(null=True, blank=True)
     
     # Notes
-    notes = models.CharField(max_length=500, blank=True)
+    notes = models.TextField(blank=True)
     
     # Hide it from the admin view
     hide = models.BooleanField(default=False)

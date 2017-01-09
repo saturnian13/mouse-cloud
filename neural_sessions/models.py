@@ -11,6 +11,8 @@ import runner.models
 class NeuralSession(models.Model):
     # Name of the session
     name = models.CharField(max_length=200)
+    
+    notes = models.TextField(blank=True)
 
     # Sort name
     # Perhaps better to have a separate object for each sort?

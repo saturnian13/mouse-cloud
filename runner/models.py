@@ -42,7 +42,7 @@ class Mouse(models.Model):
     SEX_CHOICES = ((0, 'M'), (1, 'F'), (2, '?'))
     sex = models.IntegerField(choices=SEX_CHOICES, default=2)
     dob = models.DateField(blank=True, null=True)
-    notes = models.CharField(max_length=100, blank=True)    
+    notes = models.TextField(blank=True)    
     sack_date = models.DateField('sac date', blank=True, null=True)
     
     # We copy these data as a string, rather than creating a cascade
