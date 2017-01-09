@@ -198,6 +198,15 @@ class PythonProtocol(models.Model):
     def __str__(self):
         return str(self.name)
 
+class GrandSession(models.Model):
+    """Linked behavioral, opto, neural, video sessions
+    
+    This is used to store the correspondences between sessions.
+    And also can be created online to keep notes before the behavioral
+    session is completed.
+    """
+    pass
+
 class Session(models.Model):
     """Info about a single behavioral session"""
     # The name will be constructed from the date, mouse, etc
@@ -258,6 +267,9 @@ class Session(models.Model):
     user_data_weight = models.FloatField(
         null=True, blank=True, verbose_name='Weight')
 
+    # Link to GrandSession
+    grand_session = models.OneToOneField(GrandSession, null=True, blank=True)
+
     def __str__(self):
         if self.name:
             return str(self.name)
@@ -304,6 +316,7 @@ class OptoSession(models.Model):
     Seems like this will always be OneToOne with Session. But this is
     an optional link, in case at some point we link these things differently.
     """
+    grand_session = models.OneToOneField(GrandSession, null=True, blank=True)
     behavioral_session = models.OneToOneField(Session, null=True, blank=True)
     target = models.CharField(max_length=50, blank=True)
     start_power = models.FloatField(null=True, blank=True)
@@ -313,17 +326,4 @@ class OptoSession(models.Model):
     fiber_diameter = models.FloatField(null=True, blank=True)
     notes = models.TextField(null=True, blank=True)
     sham = models.NullBooleanField(null=True, blank=True)
-
-class GrandSession(models.Model):
-    """Linked behavioral, opto, neural, video sessions
     
-    This is used to store the correspondences between sessions.
-    And also can be created online to keep notes before the behavioral
-    session is completed.
-    """
-    behavioral_session = models.OneToOneField(Session, null=True, blank=True)
-    opto_session = models.OneToOneField(OptoSession, null=True, blank=True)
-    video_session = models.OneToOneField(
-        'whisk_video.VideoSession', null=True, blank=True)
-    neural_session = models.OneToOneField(
-        'neural_sessions.NeuralSession', null=True, blank=True)

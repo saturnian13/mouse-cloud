@@ -20,6 +20,10 @@ class NeuralSession(models.Model):
     # Link it to a behavioral session
     bsession = models.ForeignKey(runner.models.Session)
 
+    # Link to GrandSession
+    grand_session = models.OneToOneField(
+        runner.models.GrandSession, null=True, blank=True)
+
     ## Data files
     # These are *relative to the session/sort directory*
     kwik_filename = models.CharField(max_length=100, blank=True, 

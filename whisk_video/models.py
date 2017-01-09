@@ -20,6 +20,10 @@ class VideoSession(models.Model):
     # VideoSessions
     bsession = models.ForeignKey(runner.models.Session, blank=True, null=True)
 
+    # Link to GrandSession
+    grand_session = models.OneToOneField(
+        runner.models.GrandSession, null=True, blank=True)
+
     # Parameters of the video
     frame_height = models.IntegerField(null=True, blank=True)
     frame_width = models.IntegerField(null=True, blank=True)
