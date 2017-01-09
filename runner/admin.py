@@ -1,7 +1,9 @@
 from django.contrib import admin
 from .models import Mouse, Box, Board, ArduinoProtocol, \
-    PythonProtocol, Session, BehaviorCage, OptoSession
+    PythonProtocol, Session, BehaviorCage, OptoSession, GrandSession
 from suit.admin import SortableModelAdmin
+from whisk_video.admin import VideoSessionInline
+from neural_sessions.admin import NeuralSessionInline
 
 # Register your models here.
 
@@ -22,6 +24,25 @@ class SessionInline(admin.TabularInline):
         'irl_param_stimulus_arm',
         )
 
+class BehavioralSessionInline(admin.StackedInline):
+    """For a tab within GrandSession"""
+    model = Session
+    fields = ('name', 'mouse', 'board', 'box', 
+        'date_time_start', 'date_time_stop',
+        'python_param_scheduler_name', 'python_param_stimulus_set',
+        'irl_param_stimulus_arm',
+        'user_data_water_pipe_position_start',
+        'user_data_water_pipe_position_stop',
+        'user_data_left_water_consumption',
+        'user_data_right_water_consumption',
+        'user_data_left_valve_mean',
+        'user_data_right_valve_mean',
+        'user_data_weight',
+        'logfile', 'autosketch_path', 'script_path', 'sandbox',
+    )
+    
+    suit_classes = 'suit-tab suit-tab-behavior'
+
 class OptoSessionInline(admin.StackedInline):
     """Inlined information about OptoSession in a behavioral Session"""
     model = OptoSession
@@ -31,6 +52,73 @@ class OptoSessionInline(admin.StackedInline):
     
     # Put it on the opto tab
     suit_classes = 'suit-tab suit-tab-opto'
+
+class GrandSessionAdmin(admin.ModelAdmin):
+    """Admin interface for linked sessions
+    
+    Each type of session gets its own tab. This is useful for creating
+    the sessions and taking notes online (before the behavioral session
+    is completed).
+    
+    The list view is used to get a general sense of which sessions are
+    available for each type of analysis (neural data, opto, etc).
+    """
+    # Fields separated by tabs
+    fieldsets = [
+        ('General (notes will go here)', {
+            'classes': ('suit-tab', 'suit-tab-general',),
+            'fields': [
+            ],
+        }),
+    ]
+
+    # Tabs
+    suit_form_tabs = (
+        ('general', 'General'),
+        ('behavior', 'Behavior'),
+        ('opto', 'Opto'),
+        ('video', 'Video'),
+        ('neural', 'Neural'),
+    )    
+
+    # List view
+    list_display = [
+        'id',
+        'videosession', 
+        'videosession__notes',
+        'neuralsession__name', 
+        #~ 'neuralsession__notes',
+        'optosession', 
+        'optosession__notes',
+        'behavioralsession__name',
+    ]
+    
+    ## Callables for the list display (usual __ syntax doesn't work here)
+    def neuralsession__name(self, obj):
+        return obj.neuralsession.name
+    neuralsession__name.short_description = 'neural'
+
+    def behavioralsession__name(self, obj):
+        return obj.session.name
+    behavioralsession__name.short_description = 'behavior'
+
+    def videosession__notes(self, obj):
+        return obj.videosession.notes
+    videosession__notes.short_description = 'video notes'
+    
+    def neuralsession__notes(self, obj):
+        return obj.neuralsession.notes
+    neuralsession__notes.short_description = 'neural notes'
+    
+    def optosession__notes(self, obj):
+        return obj.optosession.notes
+    optosession__notes.short_description = 'opto notes'
+    
+    #~ list_filter = ['mouse', 'board', 'box']
+    #~ ordering = ['-date_time_start']
+    
+    inlines = [OptoSessionInline, VideoSessionInline, NeuralSessionInline,
+        BehavioralSessionInline]
 
 class SessionAdmin(admin.ModelAdmin):
     fieldsets = [
@@ -110,6 +198,7 @@ admin.site.register(Box, BoxAdmin)
 admin.site.register(Board, BoardAdmin)
 admin.site.register(Session, SessionAdmin)
 admin.site.register(OptoSession, OptoSessionAdmin)
+admin.site.register(GrandSession, GrandSessionAdmin)
 admin.site.register(BehaviorCage)
 admin.site.register(ArduinoProtocol)
 admin.site.register(PythonProtocol)

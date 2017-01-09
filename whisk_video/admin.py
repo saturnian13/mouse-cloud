@@ -6,7 +6,17 @@ import whisk_video.models
 from django.forms import TextInput, Textarea
 from django.db import models
 
-# Register your models here.
+class VideoSessionInline(admin.StackedInline):
+    """For a tab within GrandSession"""
+    model = whisk_video.models.VideoSession
+    fields = (
+        'name', 'frame_height', 'frame_width', 'frame_rate',
+        'lens_fstop', 'imaq_exposure_time', 'imaq_digital_gain',
+        'imaq_digital_offset', 'notes', 'hide',
+    )
+    
+    suit_classes = 'suit-tab suit-tab-video'
+
 class VideoSessionAdmin(admin.ModelAdmin):
     list_display = ['name', 'bsession', 
         'whiskers_isnotnull', 'sync_isnotnull',
