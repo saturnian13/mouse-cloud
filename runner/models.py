@@ -321,9 +321,9 @@ class GrandSession(models.Model):
     And also can be created online to keep notes before the behavioral
     session is completed.
     """
-    behavioral_session = models.ForeignKey(Session, null=True, blank=True)
-    opto_session = models.ForeignKey(OptoSession, null=True, blank=True)
-    video_session = models.ForeignKey(
+    behavioral_session = models.OneToOneField(Session, null=True, blank=True)
+    opto_session = models.OneToOneField(OptoSession, null=True, blank=True)
+    video_session = models.OneToOneField(
         'whisk_video.VideoSession', null=True, blank=True)
-    neural_session = models.ForeignKey(
+    neural_session = models.OneToOneField(
         'neural_sessions.NeuralSession', null=True, blank=True)
