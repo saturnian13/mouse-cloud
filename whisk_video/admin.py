@@ -12,7 +12,7 @@ class VideoSessionInline(admin.StackedInline):
     fields = (
         'name', 'frame_height', 'frame_width', 'frame_rate',
         'lens_fstop', 'imaq_exposure_time', 'imaq_digital_gain',
-        'imaq_digital_offset', 'notes', 'hide',
+        'imaq_digital_offset', 'notes', 'whisker_colors', 'hide',
     )
     
     suit_classes = 'suit-tab suit-tab-video'
