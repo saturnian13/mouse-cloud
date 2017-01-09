@@ -23,6 +23,40 @@ class SessionInline(admin.TabularInline):
         )
 
 class SessionAdmin(admin.ModelAdmin):
+    fieldsets = [
+        (None, {
+            'classes': ('suit-tab', 'suit-tab-behavior',),
+            'fields': ['name', 'mouse', 'board', 'box', 
+                'date_time_start', 'date_time_stop',
+            ],
+        }),
+        ('More about behavior', {
+            'classes': ('suit-tab', 'suit-tab-behavior',),
+            'fields': ['logfile', 'autosketch_path', 'script_path', 'sandbox',
+                'python_param_scheduler_name', 'python_param_stimulus_set',
+                'user_data_water_pipe_position_start',
+                'user_data_water_pipe_position_stop',
+                'user_data_left_water_consumption',
+                'user_data_right_water_consumption',
+                'user_data_left_valve_mean',
+                'user_data_right_valve_mean',
+                'user_data_weight',
+            ],
+        }),
+        (None, {
+            'classes': ('suit-tab', 'suit-tab-opto',),
+            'fields': [
+            ],
+        }),
+    ]
+    
+    suit_form_tabs = (
+        ('behavior', 'Behavior'),
+        ('opto', 'Opto'),
+        ('video', 'Video'),
+        ('neural', 'Neural'),
+    )
+    
     list_display = ['date_time_start', 'mouse', 'board', 'box',
         'python_param_scheduler_name',
         'python_param_stimulus_set',
