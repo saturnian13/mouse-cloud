@@ -313,3 +313,17 @@ class OptoSession(models.Model):
     fiber_diameter = models.FloatField(null=True, blank=True)
     notes = models.TextField(null=True, blank=True)
     sham = models.NullBooleanField(null=True, blank=True)
+
+class GrandSession(models.Model):
+    """Linked behavioral, opto, neural, video sessions
+    
+    This is used to store the correspondences between sessions.
+    And also can be created online to keep notes before the behavioral
+    session is completed.
+    """
+    behavioral_session = models.ForeignKey(Session, null=True, blank=True)
+    opto_session = models.ForeignKey(OptoSession, null=True, blank=True)
+    video_session = models.ForeignKey(
+        'whisk_video.VideoSession', null=True, blank=True)
+    neural_session = models.ForeignKey(
+        'neural_sessions.NeuralSession', null=True, blank=True)
