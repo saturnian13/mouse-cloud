@@ -218,6 +218,9 @@ class GrandSession(models.Model):
     def __str__(self):
         return str(self.name)
 
+    class Meta:
+        ordering = ['name']
+
 class Session(models.Model):
     """Info about a single behavioral session"""
     # The name will be constructed from the date, mouse, etc
