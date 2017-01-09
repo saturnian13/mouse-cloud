@@ -219,7 +219,7 @@ class GrandSession(models.Model):
         return str(self.name)
 
     class Meta:
-        ordering = ['name']
+        ordering = ['-name']
 
 class Session(models.Model):
     """Info about a single behavioral session"""
