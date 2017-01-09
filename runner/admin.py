@@ -84,13 +84,12 @@ class GrandSessionAdmin(admin.ModelAdmin):
 
     # List view
     list_display = [
-        'id',
         'name',
         'notes',
         'videosession', 
         'videosession__notes',
         'neuralsession__name', 
-        #~ 'neuralsession__notes',
+        'neuralsession__notes',
         'optosession__info', 
         'optosession__notes',
         'behavioralsession__name',
