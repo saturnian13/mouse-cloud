@@ -91,7 +91,7 @@ class GrandSessionAdmin(admin.ModelAdmin):
         'videosession__notes',
         'neuralsession__name', 
         #~ 'neuralsession__notes',
-        'optosession', 
+        'optosession__info', 
         'optosession__notes',
         'behavioralsession__name',
     ]
@@ -112,6 +112,10 @@ class GrandSessionAdmin(admin.ModelAdmin):
     def neuralsession__notes(self, obj):
         return obj.neuralsession.notes
     neuralsession__notes.short_description = 'neural notes'
+    
+    def optosession__info(self, obj):
+        return obj.optosession.info
+    optosession__info.short_description = 'opto'
     
     def optosession__notes(self, obj):
         return obj.optosession.notes

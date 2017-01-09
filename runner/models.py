@@ -335,3 +335,14 @@ class OptoSession(models.Model):
     notes = models.TextField(null=True, blank=True)
     sham = models.NullBooleanField(null=True, blank=True)
     
+    @property
+    def info(self):
+        """Short descriptive string"""
+        res = 'sham' if self.sham else ''
+        if self.start_power:
+            res += ' %dmW' % self.start_power
+        
+        if res == '':
+            res = 'NA'
+        
+        return res
