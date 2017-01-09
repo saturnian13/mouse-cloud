@@ -214,6 +214,9 @@ class GrandSession(models.Model):
     """
     name = models.CharField(max_length=50, blank=True)
     notes = models.TextField(blank=True)
+    
+    def __str__(self):
+        return str(self.name)
 
 class Session(models.Model):
     """Info about a single behavioral session"""
