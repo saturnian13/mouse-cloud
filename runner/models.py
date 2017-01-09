@@ -213,10 +213,10 @@ class Session(models.Model):
     name = models.CharField(max_length=200, primary_key=True)
     
     # Which mouse it was
-    mouse = models.ForeignKey(Mouse)
+    mouse = models.ForeignKey(Mouse, null=True, blank=True)
     
     # The logfile
-    logfile = models.CharField(max_length=200)
+    logfile = models.CharField(max_length=200, blank=True)
 
     # Where it physically took place
     # Note multiple boxes may share the same serial port
@@ -227,11 +227,11 @@ class Session(models.Model):
     serial_port = models.CharField(max_length=50, null=True, blank=True)
     
     # The protocol that was run
-    autosketch_path = models.CharField(max_length=200)
-    script_path = models.CharField(max_length=200)
+    autosketch_path = models.CharField(max_length=200, blank=True)
+    script_path = models.CharField(max_length=200, blank=True)
     
     # The sandbox where the protocol was compiled
-    sandbox = models.CharField(max_length=200)
+    sandbox = models.CharField(max_length=200, blank=True)
     
     # Protocol parameters
     python_param_scheduler_name = models.CharField(max_length=100,

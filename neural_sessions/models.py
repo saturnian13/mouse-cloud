@@ -18,7 +18,7 @@ class NeuralSession(models.Model):
     sort_name = models.CharField(max_length=200, default='sort', blank=True)
 
     # Link it to a behavioral session
-    bsession = models.ForeignKey(runner.models.Session)
+    bsession = models.ForeignKey(runner.models.Session, null=True, blank=True)
 
     # Link to GrandSession
     grand_session = models.OneToOneField(
