@@ -204,8 +204,16 @@ class GrandSession(models.Model):
     This is used to store the correspondences between sessions.
     And also can be created online to keep notes before the behavioral
     session is completed.
+    
+    I would have preferred a FK from GrandSession to each type of session,
+    but then the inlines can't be added. It has to be a link from the 
+    session to the GrandSession. Made it a OneToOneField because it doesn't
+    make much sense to have multiple optosessions per grandsession. Although
+    there could be multiple behavioral or video sessions if something
+    crashed. Need to deal with that when it comes up.
     """
-    pass
+    name = models.CharField(max_length=50, blank=True)
+    notes = models.TextField(blank=True)
 
 class Session(models.Model):
     """Info about a single behavioral session"""
