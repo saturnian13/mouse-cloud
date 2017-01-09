@@ -65,9 +65,10 @@ class GrandSessionAdmin(admin.ModelAdmin):
     """
     # Fields separated by tabs
     fieldsets = [
-        ('General (notes will go here)', {
+        ('General', {
             'classes': ('suit-tab', 'suit-tab-general',),
             'fields': [
+                'name', 'notes',
             ],
         }),
     ]
@@ -84,6 +85,8 @@ class GrandSessionAdmin(admin.ModelAdmin):
     # List view
     list_display = [
         'id',
+        'name',
+        'notes',
         'videosession', 
         'videosession__notes',
         'neuralsession__name', 
