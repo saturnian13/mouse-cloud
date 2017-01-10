@@ -68,7 +68,7 @@ class GrandSessionAdmin(admin.ModelAdmin):
         ('General', {
             'classes': ('suit-tab', 'suit-tab-general',),
             'fields': [
-                'name', 'notes',
+                'name', 'notes', 'tags',
             ],
         }),
     ]
@@ -85,6 +85,7 @@ class GrandSessionAdmin(admin.ModelAdmin):
     # List view
     list_display = [
         'name',
+        'tag_list',
         'notes',
         'videosession', 
         'videosession__notes',
@@ -125,6 +126,15 @@ class GrandSessionAdmin(admin.ModelAdmin):
     
     inlines = [OptoSessionInline, VideoSessionInline, NeuralSessionInline,
         BehavioralSessionInline]
+    
+    # Tagging
+    # https://django-taggit.readthedocs.io/en/latest/admin.html
+    def get_queryset(self, request):
+        return super(GrandSessionAdmin, self).get_queryset(
+            request).prefetch_related('tags')
+    
+    def tag_list(self, obj):
+        return ", ".join([o.name for o in obj.tags.all()])
 
 class SessionAdmin(admin.ModelAdmin):
     fieldsets = [
