@@ -23,14 +23,14 @@ class TaggitListFilter(SimpleListFilter):
   # Parameter for the filter that will be used in the URL query.
   parameter_name = 'tag'
   
-  def lookups(self, request, GrandSessionAdmin):
+  def lookups(self, request, model_admin):
     """
     Returns a list of tuples. The first element in each tuple is the coded value
     for the option that will appear in the URL query. The second element is the
     human-readable name for the option that will appear in the right sidebar.
     """
     list = []
-    tags = TaggedItem.tags_for(GrandSessionAdmin.model)
+    tags = TaggedItem.tags_for(model_admin.model)
     for tag in tags:
       list.append( (tag.name, _(tag.name)) )
     return list    
