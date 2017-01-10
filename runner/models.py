@@ -14,6 +14,7 @@ from __future__ import unicode_literals
 
 import datetime
 from django.db import models
+from taggit.managers import TaggableManager
 
 def get_latest_daily_plan():
     return None
@@ -214,6 +215,7 @@ class GrandSession(models.Model):
     """
     name = models.CharField(max_length=50, blank=True)
     notes = models.TextField(blank=True)
+    tags = TaggableManager()
     
     def __str__(self):
         return str(self.name)
