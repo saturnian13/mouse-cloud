@@ -12,9 +12,13 @@ from django.utils.translation import ugettext_lazy as _
 from django.contrib.admin import SimpleListFilter
 from taggit.models import TaggedItem 
 
+from runner.models import GrandSession
+
 class TaggitListFilter(SimpleListFilter):
     """
     A custom filter class that can be used to filter by taggit tags in the admin.
+    
+    Edited to work for the grand_session OneToOneField
     """
 
     # Human-readable title which will be displayed in the
@@ -31,7 +35,9 @@ class TaggitListFilter(SimpleListFilter):
         human-readable name for the option that will appear in the right sidebar.
         """
         list = []
-        tags = TaggedItem.tags_for(model_admin.model)
+        
+        # Instead of model_admin (VideoSession), always search for GrandSession
+        tags = TaggedItem.tags_for(GrandSession)
         for tag in tags:
             list.append( (tag.name, _(tag.name)) )
         return list    
@@ -42,7 +48,8 @@ class TaggitListFilter(SimpleListFilter):
         string and retrievable via `self.value()`.
         """
         if self.value():
-            return queryset.filter(tags__name__in=[self.value()])
+            # Search on linked grand_session
+            return queryset.filter(grand_session__tags__name__in=[self.value()])
 
 class VideoSessionInline(admin.StackedInline):
     """For a tab within GrandSession"""
