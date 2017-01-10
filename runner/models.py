@@ -215,7 +215,7 @@ class GrandSession(models.Model):
     """
     name = models.CharField(max_length=50, blank=True)
     notes = models.TextField(blank=True)
-    tags = TaggableManager()
+    tags = TaggableManager(blank=True)
     
     def __str__(self):
         return str(self.name)
