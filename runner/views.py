@@ -24,7 +24,7 @@ import models
 tz = pytz.timezone('America/New_York')
 
 def weight_plot(request):
-    # Get cohorts (so we can detect missing data later)
+    ## Get cohorts (so we can detect missing data later)
     qs = Mouse.objects.filter(in_training=True)
     cohort_df = pandas.DataFrame.from_records(list(qs.values_list(
         'name', 'training_cohort')), columns=['mouse', 'cohort'])
@@ -36,7 +36,7 @@ def weight_plot(request):
     cohort2mouse_names = dict([(cohort, list(ser.values)) 
         for cohort, ser in cohort_df.groupby('cohort')['mouse']])
 
-    # Extract weights
+    ## Extract weights
     columns = ['date_time_start', 'mouse__name', 'user_data_weight', 
         'mouse__training_cohort']
     thresh_date = datetime.date.today() - datetime.timedelta(days=45)
@@ -47,13 +47,18 @@ def weight_plot(request):
     weight_df['date'] = weight_df['date_time_start'].apply(
         lambda dt: dt.astimezone(tz).date())
 
+    # Replace missing cohorts in the actual data
+    weight_df.loc[
+        weight_df['mouse__training_cohort'].isnull(), 
+        'mouse__training_cohort'] = -1
+
     # Pivot
     # In case there are multiple sessions, take the mean
     piv = weight_df.pivot_table(index='date', 
         columns=('mouse__training_cohort', 'mouse__name'),
         values='user_data_weight')
 
-    # Make figure
+    ## Make figure
     cohort_labels = sorted(cohort2mouse_names.keys())
     f = Figure(figsize=(12, 4 * len(cohort_labels)), dpi=80)
     axa = [
@@ -83,6 +88,7 @@ def weight_plot(request):
         labels = cohort_weights.index.format(
             formatter = lambda x: x.strftime('%m-%d'))
         ax.set_xticklabels(labels, rotation=45, size='medium')
+        ax.set_xlim((-.5, len(cohort_weights) - .5))
         
         # Legend is the mouse names
         ax.legend(list(cohort_weights.columns), loc='lower left', 
