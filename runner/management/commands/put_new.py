@@ -2,7 +2,7 @@
 
 import django
 import runner.models
-import BeWatch
+import MCwatch.behavior
 import os
 import json
 import datetime
@@ -30,11 +30,11 @@ def split_once(path):
 class Command(NoArgsCommand):
     def handle_noargs(self, **options):
         # get new records
-        PATHS = BeWatch.db.get_paths()
-        bdf = BeWatch.db.search_for_behavior_files(
+        PATHS = MCwatch.behavior.db.get_paths()
+        bdf = MCwatch.behavior.db.search_for_behavior_files(
             behavior_dir=PATHS['behavior_dir'],
             clean=True)
-        perfdf = BeWatch.db.get_perf_metrics()
+        perfdf = MCwatch.behavior.db.get_perf_metrics()
 
 
         for idx, logfile in bdf['filename'].iteritems():
@@ -69,7 +69,7 @@ class Command(NoArgsCommand):
             if 'left_perf' not in results:
                 data_available = True
                 try:
-                    tm = BeWatch.db.get_trial_matrix(session_name)
+                    tm = MCwatch.behavior.db.get_trial_matrix(session_name)
                 except IOError:
                     data_available = False
                 
