@@ -184,6 +184,7 @@ class SessionAdmin(admin.ModelAdmin):
                 'date_time_start', 'date_time_stop',
                 'python_param_scheduler_name', 'python_param_stimulus_set',
                 'irl_param_stimulus_arm',
+                'grand_session',
             ],
         }),
         ('User-provided data', {
@@ -207,9 +208,7 @@ class SessionAdmin(admin.ModelAdmin):
 
     suit_form_tabs = (
         ('behavior', 'Behavior'),
-        ('opto', 'Opto'),
-        ('video', 'Video'),
-        ('neural', 'Neural'),
+        ('filenames', 'Filenames'),
     )
     
     list_display = ['date_time_start', 'mouse', 'board', 'box',
@@ -226,8 +225,6 @@ class SessionAdmin(admin.ModelAdmin):
     
     list_filter = ['mouse', 'board', 'box']
     ordering = ['-date_time_start']
-    
-    inlines = [OptoSessionInline,]
 
 class MouseAdmin(admin.ModelAdmin):
     list_display = [
