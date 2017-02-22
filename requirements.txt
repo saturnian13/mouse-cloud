@@ -8,3 +8,4 @@ django-crispy-forms==1.6.0
 pandas
 matplotlib
 django-taggit
+django-axes

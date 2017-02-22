@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/1.9/ref/settings/
 
 import os
 import dj_database_url
+import datetime
 
 # set DATABASE_URL and DJANGO_SECRET_KEY environment variables
 # this does nothing if we are in the heroku environment, which is
@@ -83,6 +84,7 @@ INSTALLED_APPS = [
     'whitenoise.runserver_nostatic',
     'django.contrib.staticfiles',
     'taggit',
+    'axes',
 ]
 
 MIDDLEWARE_CLASSES = [
@@ -202,3 +204,5 @@ LOGGING = {
     },
 }
 
+# Time after lockout before restoring
+AXES_COOLOFF_TIME = datetime.timedelta(minutes=10)
