@@ -16,12 +16,13 @@ Including another URLconf
 from django.conf.urls import include, url
 from django.contrib import admin
 import runner.views
+from django.contrib.auth.decorators import login_required
 
 urlpatterns = [
     url(r'^runner/', include('runner.urls')),
     url(r'^admin/', admin.site.urls),
-    url(r'^weights$', runner.views.weight_plot,
+    url(r'^weights$', login_required(runner.views.weight_plot),
         name='weight_plot-simple',),    
-    url(r'^rewards$', runner.views.rewards_plot,
+    url(r'^rewards$', login_required(runner.views.rewards_plot),
         name='reward_plot'),
 ]
