@@ -9,9 +9,9 @@ import json
 
 
 # Which mouse to get and what info to assign
-husbandry_name = '3081-6'
-headplate_color = 'S?'
-training_name = 'KM109'
+husbandry_name = '3082-7'
+headplate_color = 'BG'
+training_name = 'KF113'
 
 # Connect to the master database
 master_credentials_path = os.path.expanduser(
@@ -79,5 +79,12 @@ else:
 
 # Set in new object
 new_mouse.genotype = genotype
+
+# Training parameters
+new_mouse.stimulus_set = 'trial_types_CCL_1srvpos'
+new_mouse.max_rewards_per_trial = 999
+new_mouse.scheduler = 'ForcedAlternationLickTrain'
+new_mouse.protocol_name = 'LickTrain'
+new_mouse.script_name = 'LickTrain.py'
 
 new_mouse.save()
