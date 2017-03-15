@@ -55,6 +55,9 @@
     <property name="selectionBehavior">
      <enum>QAbstractItemView::SelectRows</enum>
     </property>
+    <property name="rowCount">
+     <number>25</number>
+    </property>
     <row>
      <property name="text">
       <string>1</string>
@@ -130,6 +133,16 @@
       <string>15</string>
      </property>
     </row>
+    <row/>
+    <row/>
+    <row/>
+    <row/>
+    <row/>
+    <row/>
+    <row/>
+    <row/>
+    <row/>
+    <row/>
     <column>
      <property name="text">
       <string>Mouse</string>
@@ -327,7 +340,7 @@
      <x>0</x>
      <y>0</y>
      <width>1020</width>
-     <height>27</height>
+     <height>22</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuS">
