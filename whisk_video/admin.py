@@ -131,7 +131,10 @@ class VideoSessionAdmin(admin.ModelAdmin):
     sync_isnotnull.boolean = True        
     
     def tags(self, obj):
-        return ", ".join([o.name for o in obj.grand_session.tags.all()])
+        if obj.grand_session:
+            return ", ".join([o.name for o in obj.grand_session.tags.all()])
+        else:
+            return ""
 
 
 admin.site.register(whisk_video.models.VideoSession, VideoSessionAdmin)
