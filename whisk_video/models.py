@@ -25,13 +25,13 @@ class VideoSession(models.Model):
         runner.models.GrandSession, null=True, blank=True)
 
     # Parameters of the video
-    frame_height = models.IntegerField(null=True, blank=True)
-    frame_width = models.IntegerField(null=True, blank=True)
-    frame_rate = models.FloatField(null=True, blank=True)
-    lens_fstop = models.FloatField(null=True, blank=True)
-    imaq_exposure_time = models.FloatField(null=True, blank=True)
-    imaq_digital_gain = models.IntegerField(null=True, blank=True)
-    imaq_digital_offset = models.IntegerField(null=True, blank=True)
+    frame_height = models.IntegerField(null=True, blank=True, default=550)
+    frame_width = models.IntegerField(null=True, blank=True, default=640)
+    frame_rate = models.FloatField(null=True, blank=True, default=200.0)
+    lens_fstop = models.FloatField(null=True, blank=True, default=5.0)
+    imaq_exposure_time = models.FloatField(null=True, blank=True, default=150.0)
+    imaq_digital_gain = models.IntegerField(null=True, blank=True, default=2)
+    imaq_digital_offset = models.IntegerField(null=True, blank=True, default=-600)
     
     # Notes
     notes = models.TextField(blank=True)
