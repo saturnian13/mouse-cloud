@@ -228,10 +228,11 @@ class SessionAdmin(admin.ModelAdmin):
 
 class MouseAdmin(admin.ModelAdmin):
     list_display = [
-        'husbandry_name', 'name', 'in_training', 'training_cohort', 
+        'husbandry_name', 'name', 'number', 'in_training', 'training_cohort', 
+        'stimulus_set',
         'dob', 'notes', 'sack_date', 'genotype', 'headplate_color', 'cage',
     ]
-    
+    ordering = ['-in_training', 'number']
     list_editable = ['in_training', 'training_cohort']
 
 class DailyPlanAdmin(admin.ModelAdmin):
