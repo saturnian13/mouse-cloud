@@ -54,6 +54,7 @@ class Mouse(models.Model):
     # Extra demographic information for behavior
     husbandry_name = models.CharField(max_length=20, null=True, blank=True)
     headplate_color = models.CharField(max_length=10, null=True, blank=True)
+    number = models.IntegerField(null=True, blank=True)
     
     # This determines whether to include this mouse in reports, and maybe
     # whether the Runner should include it in the training plan.
