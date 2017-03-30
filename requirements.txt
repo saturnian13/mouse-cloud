@@ -5,7 +5,7 @@ psycopg2==2.6.2
 whitenoise==3.2
 django-suit==0.2.18
 django-crispy-forms==1.6.0
-pandas
-matplotlib
+pandas==0.19.1
+matplotlib==1.5.3
 django-taggit
-django-axes
+django-axes==2.3.2
