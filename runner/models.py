@@ -73,6 +73,10 @@ class Mouse(models.Model):
     scheduler = models.CharField(max_length=50, blank=True)
     max_rewards_per_trial = models.IntegerField(null=True, blank=True, default=1)
     
+    # C params
+    # must be strings
+    task_reaction_time = models.CharField(max_length=10, default='0')
+    
     # build params
     protocol_name = models.CharField(max_length=50, blank=True)
     script_name = models.CharField(max_length=50, blank=True)
