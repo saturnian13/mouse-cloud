@@ -75,7 +75,7 @@ class Mouse(models.Model):
     
     # C params
     # must be strings
-    task_reaction_time = models.CharField(max_length=10, default='0')
+    task_reaction_time = models.CharField(max_length=10, default='')
     
     # build params
     protocol_name = models.CharField(max_length=50, blank=True)
