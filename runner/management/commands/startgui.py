@@ -77,7 +77,7 @@ class MyApp(QtGui.QMainWindow, Ui_MainWindow):
         # Timer to refresh data
         self.timer = QtCore.QTimer(self)
         self.timer.timeout.connect(self.poll_sessions)
-        self.timer.start(3000)
+        self.timer.start(6000)
     
     def poll_sessions(self):
         """Poll sessions that have run and update row colors"""
@@ -107,7 +107,8 @@ class MyApp(QtGui.QMainWindow, Ui_MainWindow):
                     # Started but not saved
                     qb.setStyleSheet("background-color: red")
                 else:
-                    print mouse_name
+                    # Not started
+                    pass
     
     def set_table_data(self):
         # Date of most recent session
