@@ -15,6 +15,7 @@ import datetime
 import functools
 import ArduFSM.Runner.start_runner_cli
 import pytz
+import glob
 
 from django.core.management.base import NoArgsCommand
 
@@ -27,6 +28,9 @@ tz = pytz.timezone('US/Eastern')
 qtCreatorFile = os.path.join(os.path.split(__file__)[0], 
     "MouseRunner/mainwindow.ui")
 Ui_MainWindow, QtBaseClass = uic.loadUiType(qtCreatorFile)
+
+# This is used for polling for sandboxes that have started
+sandbox_root = os.path.expanduser('~/sandbox_root')
 
 # Helper functions
 def create_combo_box(choice_l, index=None, choice=None):
@@ -69,6 +73,41 @@ class MyApp(QtGui.QMainWindow, Ui_MainWindow):
         self.toolbar = self.addToolBar('Toolbar')
         self.toolbar.addAction(self.move_up_action)
         self.toolbar.addAction(self.move_down_action)
+        
+        # Timer to refresh data
+        self.timer = QtCore.QTimer(self)
+        self.timer.timeout.connect(self.poll_sessions)
+        self.timer.start(3000)
+    
+    def poll_sessions(self):
+        """Poll sessions that have run and update row colors"""
+        now = datetime.datetime.now()
+        date_string = now.strftime('%Y-%m-%d')
+        for nrow in range(self.daily_plan_table.rowCount()):
+            # Get the mouse in this row
+            mouse_name_item = self.daily_plan_table.item(nrow, 0)
+            if mouse_name_item is None:
+                continue
+            mouse_name = mouse_name_item.text()
+            
+            # Check if sandbox exists
+            sandboxes = glob.glob(os.path.join(sandbox_root, 
+                '%s-*-%s-*' % (date_string, mouse_name)))
+            saved_sandboxes = glob.glob(os.path.join(sandbox_root, 
+                '%s-*-%s-*-saved' % (date_string, mouse_name)))                
+        
+            # Get the pushbutton
+            qb = self.daily_plan_table.cellWidget(nrow, 6)
+            if qb is not None:
+                # Set green if done, red if started
+                if len(saved_sandboxes) > 0:
+                    # Saved
+                    qb.setStyleSheet("background-color: green")
+                elif len(sandboxes) > 0:
+                    # Started but not saved
+                    qb.setStyleSheet("background-color: red")
+                else:
+                    print mouse_name
     
     def set_table_data(self):
         # Date of most recent session
