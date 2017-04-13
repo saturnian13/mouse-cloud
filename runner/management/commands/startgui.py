@@ -79,13 +79,29 @@ class MyApp(QtGui.QMainWindow, Ui_MainWindow):
             '-date_time_start')[0].date_time_start.astimezone(tz).date()
         self.target_date_display.setText(target_date.strftime('%Y-%m-%d'))
         
-        # Get all sessions on that date
-        previous_sessions = runner.models.Session.objects.filter(
-            date_time_start__date=target_date).order_by('date_time_start')        
+        # Get all mice that are in training
+        mice_qs = runner.models.Mouse.objects.filter(in_training=True)
         
-        # Fill out the new daily plan to look just like the old one
+        # Get previous session from each mouse
+        previous_sessions = []
+        new_mice = []
+        for mouse in mice_qs.all():
+            # Find previous sessions
+            mouse_prev_sess_qs = runner.models.Session.objects.filter(
+                mouse=mouse).order_by('date_time_start')
+            
+            # Store the most recent, or if None, add to new_mice
+            if mouse_prev_sess_qs.count() > 0:
+                previous_sessions.append(mouse_prev_sess_qs.last())
+            else:
+                new_mice.append(mouse)
+        
+        # Sort the sessions by time
+        previous_sessions = sorted(previous_sessions, 
+            key=lambda s: s.date_time_start)
+        
+        # Get the choices for box and board
         box_l = sorted([box.name for box in runner.models.Box.objects.all()])
-        mouse_l = sorted([mouse.name for mouse in runner.models.Mouse.objects.all()])
         board_l = sorted([board.name for board in runner.models.Board.objects.all()])
         
         # Set every row with the same widgets
