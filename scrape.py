@@ -9,9 +9,10 @@ import json
 
 
 # Which mouse to get and what info to assign
-husbandry_name = '3082-7'
-headplate_color = 'BG'
-training_name = 'KF113'
+husbandry_name = '3102-5'
+headplate_color = 'YS'
+training_name = 'KF119'
+training_number = 119
 
 # Connect to the master database
 master_credentials_path = os.path.expanduser(
@@ -40,6 +41,7 @@ if len(runner.models.Mouse.objects.filter(husbandry_name=mouse['name'])) > 0:
 # Create a new mouse with values copied from the old one
 new_mouse = runner.models.Mouse(
     name=training_name,
+    number=training_number,
     husbandry_name=mouse['name'],
     sex=mouse.sex,
     headplate_color=headplate_color,
