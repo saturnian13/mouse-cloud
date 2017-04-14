@@ -29,7 +29,7 @@ def draw_label(label, width, height, obj):
         label.add(shapes.String(
             width * .5,
             height - 10,
-            "WATER RESTRICTED",
+            "WATER RESTRICTED -- Cage %s" % obj['cage_name'],
             **kwargs))
 
         label.add(shapes.String(
@@ -54,13 +54,17 @@ def draw_label(label, width, height, obj):
                 **kwargs))
     
     elif obj['typ'] == 'cage':
-        kwargs = {'fontName': 'Helvetica', 'fontSize': 9, 'textAnchor': 'middle',
+        kwargs = {'fontName': 'Helvetica', 'fontSize': 10, 'textAnchor': 'start',
             'fillColor': fillColor}        
+
+        ## Header
+        label.add(shapes.String(
+            width * .5, height - 10, "Cage: %s" % obj['cage_name'],
+            fontName='Helvetica', fontSize=10, fillColor=fillColor,
+            textAnchor='middle'))
         
         ## Each mouse
-        xy_l = [(.25, -24), (.75, -24), (.25, -36), (.75, -36),
-            (.25, -48), (.75, -48)]
-        xy_l = [(.5, y) for y in [-9, -18, -27, -36, -45]]
+        xy_l = [(.1, -20), (.6, -20), (.1, -30), (.6, -30), (.1, -40)]
         
         for mouse, full_name, genotype, headplate, xy in zip(
             obj['mice'], obj['full_names'], obj['genotypes'], 
@@ -69,7 +73,7 @@ def draw_label(label, width, height, obj):
             label.add(shapes.String(
                 width * xy[0],
                 height + xy[1],
-                '%s - %s - %s - %s' % (mouse, headplate, full_name, genotype),
+                '%s - %s - %s' % (mouse, headplate, full_name),
                 **kwargs))
 
 
@@ -85,8 +89,8 @@ def draw_label(label, width, height, obj):
 #~ cage_name_l = ['Purple2', 'Purple3', 'Pink',]
 
 # Directly specify the cages we need
-water_restriction_cage_name_l = ['Blue', 'Green', 'Purple', 'Brown', 'Orange']
-cage_card_cage_name_l = ['Purple', 'Brown', 'Orange']
+water_restriction_cage_name_l = ['CR1', 'CR2', 'CR3']
+cage_card_cage_name_l = ['CR1', 'CR2', 'CR3']
 cage_name_l = water_restriction_cage_name_l + cage_card_cage_name_l
 cage_name_l = list(np.unique(cage_name_l))
     
@@ -95,18 +99,19 @@ colony_specs = {}
 for cage_name in cage_name_l:
     # Init the specs for this cage
     colony_specs[cage_name] = {}
-    colony_specs[cage_name]['fillColor'] = ''.join(filter(
-        lambda c: c.isalpha(), cage_name)).lower()
     colony_specs[cage_name]['mice'] = []
     colony_specs[cage_name]['headplates'] = []
     colony_specs[cage_name]['genotypes'] = []
     colony_specs[cage_name]['full_names'] = []
-
-    if colony_specs[cage_name]['fillColor'] == 'pink':
-        colony_specs[cage_name]['fillColor'] = 'magenta'
+    colony_specs[cage_name]['cage_name'] = cage_name
 
     # Find the cage
     cage = runner.models.BehaviorCage.objects.filter(name=cage_name).first()
+    
+    # Set the color
+    colony_specs[cage_name]['fillColor'] = cage.label_color.lower()
+    if colony_specs[cage_name]['fillColor'] == 'pink':
+        colony_specs[cage_name]['fillColor'] = 'magenta'
     
     # Iterate over mice
     for mouse in cage.mouse_set.all():
@@ -120,7 +125,7 @@ sheet = labels.Sheet(specs, draw_label, border=False)
 
 # Define the used labels
 used_labels = []
-for row in range(1, 2): # second number is the 1-based row to start on
+for row in range(1, 7): # second number is the 1-based row to start on
     for col in range(1, 3):
         used_labels.append((row, col))
 sheet.partial_page(1, used_labels)
