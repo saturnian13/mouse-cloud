@@ -16,9 +16,57 @@ import functools
 import ArduFSM.Runner.start_runner_cli
 import pytz
 import glob
+import subprocess
 
 from django.core.management.base import NoArgsCommand
 
+
+def probe_arduino_user(arduino):
+    """Checks if any programs are using /dev/ttyACM*
+    
+    Returns: result, pid_string
+        result: a string
+            'in use' : the arduino is in use
+            'not in use' : the arduino exists but is not in use
+            'does not exist' : no such file
+            'unknown error 1' : return code 1, some unhandled error
+            'unknown error' : any other unhandled error
+        pid_string: a string
+            If result == 'in use', this is a space separated list of pids
+            Otherwise this will be an empty string
+    """
+    # Shortcut if the file doesn't exist
+    if not os.path.exists(arduino):
+        return 'does not exist'
+    
+    # Subprocess to probe arduino
+    proc = subprocess.Popen(['fuser', arduino],
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+    )
+    stdout, stderr = proc.communicate()
+    returncode = proc.returncode
+    
+    # Parse results
+    pid_string = ''
+    if returncode == 0:
+        # It exists and it is in use
+        # In this case stdout is a space-separated list of pids
+        result = 'in use'
+        pid_string = stdout
+    elif returncode == 1:
+        if stdout == '' and stderr == '':
+            # File exists and is not in use
+            result = 'not in use'
+        elif stdout == '' and stderr == (
+            'Specified filename %s does not exist.\n' % arduino):
+            result = 'does not exist'
+        else:
+            result = 'unknown error 1'
+    else:
+        result = 'unknown error'
+    
+    return result, pid_string
 
 # Hack, see below
 tz = pytz.timezone('US/Eastern')
@@ -43,6 +91,19 @@ def create_combo_box(choice_l, index=None, choice=None):
     return qcb
 
 def call_external(mouse, board, box, **other_python_parameters):
+    # Make sure the arduino is available
+    box_obj = runner.models.board.objects.filter(name=box).first()
+    arduino = box_obj.serial_port
+    result, pid_string = probe_arduino_user(arduino)
+    
+    if result == 'in use':
+        print "cannot upload to box %s; in use by these PIDs: %s" % (
+            box, pid_string)
+        return
+    elif result != 'not in use':
+        print "cannot upload to box %s: %s" % (box, result)
+        return
+    
     print mouse, board, box
     ArduFSM.Runner.start_runner_cli.main(mouse=mouse, board=board, box=box,
         **other_python_parameters)
