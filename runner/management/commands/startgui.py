@@ -92,7 +92,7 @@ def create_combo_box(choice_l, index=None, choice=None):
 
 def call_external(mouse, board, box, **other_python_parameters):
     # Make sure the arduino is available
-    box_obj = runner.models.board.objects.filter(name=box).first()
+    box_obj = runner.models.Box.objects.filter(name=box).first()
     arduino = box_obj.serial_port
     result, pid_string = probe_arduino_user(arduino)
     
