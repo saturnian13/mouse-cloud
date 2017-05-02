@@ -37,7 +37,7 @@ def probe_arduino_user(arduino):
     """
     # Shortcut if the file doesn't exist
     if not os.path.exists(arduino):
-        return 'does not exist'
+        return 'does not exist', ''
     
     # Subprocess to probe arduino
     proc = subprocess.Popen(['fuser', arduino],
