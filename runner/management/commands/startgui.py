@@ -365,6 +365,10 @@ class Command(NoArgsCommand):
 if __name__ == "__main__":
     ## Get the most recent stuff from runner
     app = QtGui.QApplication(sys.argv)
+    
+    # Set style to avoid Qt bugs
+    # http://stackoverflow.com/questions/14606396/gtk-critical-ia-gtk-widget-style-get-assertion-gtk-is-widget-widget-fa
+    app.set_style('Fusion')
     window = MyApp()
     window.show()
     sys.exit(app.exec_())
