@@ -34,32 +34,20 @@ litter_table = litter_table.set_index('breeding_cage_id')
 # Identify the row that corresponds to the target mouse
 mouse = mouse_table[mouse_table.name == husbandry_name].iloc[0]
 
-# Check whether this mouse is already in the database
-if len(runner.models.Mouse.objects.filter(husbandry_name=mouse['name'])) > 0:
-    raise ValueError("Mouse with that name already exists")
-
-# Create a new mouse with values copied from the old one
-new_mouse = runner.models.Mouse(
-    name=training_name,
-    number=training_number,
-    husbandry_name=mouse['name'],
-    sex=mouse.sex,
-    headplate_color=headplate_color,
-)
-
 # Get the DOB from the litter or directly from the mouse
 if not pandas.isnull(mouse.litter_id):
-    new_mouse.dob = litter_table.loc[int(mouse.litter_id), 'dob']
+    new_mouse_dob = litter_table.loc[int(mouse.litter_id), 'dob'].date()
 elif not pandas.isnull(mouse.manual_dob):
-    new_mouse.dob = mouse.manual_dob
+    # Not sure if the '.date()' method is necessary here
+    new_mouse_dob = mouse.manual_dob.date()
 else:
     print "warning: cannot get dob"
 
-# Set the genotype
+# Get the genotype
 # This recapitulates the logic from colony.Mouse
 mousegenes = mousegene_table[mousegene_table.mouse_name_id == mouse.id]
 if len(mousegenes) == 0 and mouse.wild_type:
-    genotype = 'pure WT'
+    new_mouse_genotype = 'pure WT'
 else:
     # Iterate over mousegenes
     res_l = []
@@ -75,18 +63,62 @@ else:
         res_l.append(res)
     
     if len(res_l) == 0:
-        genotype = 'negative'
+        new_mouse_genotype = 'negative'
     else:
-        genotype = '; '.join(res_l)
+        new_mouse_genotype = '; '.join(res_l)
 
-# Set in new object
-new_mouse.genotype = genotype
+# Collate all things to set
+# dict from django field name to correct value
+params = {
+    'name': training_name,
+    'number': training_number,
+    'sex': mouse.sex,
+    'headplate_color': headplate_color,
+    'husbandry_name': mouse['name'],
+    'dob': new_mouse_dob,
+    'genotype': new_mouse_genotype,
+    'stimulus_set': 'trial_types_CCL_1srvpos',
+    'max_rewards_per_trial': 999,
+    'scheduler': 'ForcedAlternationLickTrain',
+    'protocol_name': 'LickTrain',
+    'script_name': 'LickTrain.py',
+}
+    
 
-# Training parameters
-new_mouse.stimulus_set = 'trial_types_CCL_1srvpos'
-new_mouse.max_rewards_per_trial = 999
-new_mouse.scheduler = 'ForcedAlternationLickTrain'
-new_mouse.protocol_name = 'LickTrain'
-new_mouse.script_name = 'LickTrain.py'
+# Check whether this mouse is already in the database
+qs = runner.models.Mouse.objects.filter(husbandry_name=mouse['name'])
+if len(qs) > 0:
+    print "mouse already exists; error checking"
+    existing_mouse = qs.first()
 
-new_mouse.save()
+    for django_field_name, value in params.items():
+        # Check whether value set correctly
+        existing_value = existing_mouse.__getattribute__(django_field_name)
+        if existing_value != value:
+            print "warning: %s is %s not %s" % (django_field_name,
+                str(existing_value), str(value))
+        
+        # Could set here using __setattr__
+
+else:
+    # Create a new mouse with values copied from the old one
+    new_mouse = runner.models.Mouse(
+        name=training_name,
+        number=training_number,
+        husbandry_name=mouse['name'],
+        sex=mouse.sex,
+        headplate_color=headplate_color,
+    )
+
+    # Set in new object
+    new_mouse.dob = new_mouse_dob
+    new_mouse.genotype = new_mouse_genotype
+
+    # Training parameters
+    new_mouse.stimulus_set = 'trial_types_CCL_1srvpos'
+    new_mouse.max_rewards_per_trial = 999
+    new_mouse.scheduler = 'ForcedAlternationLickTrain'
+    new_mouse.protocol_name = 'LickTrain'
+    new_mouse.script_name = 'LickTrain.py'
+
+    new_mouse.save()
