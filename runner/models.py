@@ -76,6 +76,8 @@ class Mouse(models.Model):
     # C params
     # must be strings
     task_reaction_time = models.CharField(max_length=10, default='', blank=True)
+    nolick_max_wait_ms = models.CharField(max_length=10, default='0')
+    nolick_required_interval_ms = models.CharField(max_length=10, default='0')
     
     # build params
     protocol_name = models.CharField(max_length=50, blank=True)
