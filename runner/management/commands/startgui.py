@@ -155,7 +155,28 @@ class MyApp(QtGui.QMainWindow, Ui_MainWindow):
             sandboxes = glob.glob(os.path.join(sandbox_root, 
                 '%s-*-%s-*' % (date_string, mouse_name)))
             saved_sandboxes = glob.glob(os.path.join(sandbox_root, 
-                '%s-*-%s-*-saved' % (date_string, mouse_name)))                
+                '%s-*-%s-*-saved' % (date_string, mouse_name)))  
+            
+            # Ignore if it was before 4AM
+            def is_after_4am(sandbox_name):
+                """Returns True if the sandbox was after 4am.
+                
+                Returns False if before 4am or if parse error.
+                """
+                dirname = os.path.split(sandbox_name)[1]
+                split = dirname.split('-')
+                try:
+                    hour_int = int(split[3])
+                except (IndexError, ValueError):
+                    # Parse error
+                    return False
+                
+                if hour_int >= 4:
+                    return True
+                else:
+                    return False
+            
+            saved_sandboxes = filter(is_after_4am, saved_sandboxes)
         
             # Get the pushbutton
             qb = self.daily_plan_table.cellWidget(nrow, 6)
