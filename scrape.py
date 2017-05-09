@@ -9,10 +9,10 @@ import json
 
 
 # Which mouse to get and what info to assign
-husbandry_name = '3102-5'
-headplate_color = 'YS'
-training_name = 'KF119'
-training_number = 119
+husbandry_name = '3108-9'
+headplate_color = 'SS'
+training_name = 'KM127'
+training_number = 127
 
 # Connect to the master database
 master_credentials_path = os.path.expanduser(
@@ -27,6 +27,10 @@ mouse_table = pandas.read_sql_table('colony_mouse', conn)
 mousegene_table = pandas.read_sql_table('colony_mousegene', conn).set_index('id')
 gene_table = pandas.read_sql_table('colony_gene', conn).set_index('id')
 litter_table = pandas.read_sql_table('colony_litter', conn)
+
+# Join the mousegene_table on gene_type for sorting
+mousegene_table = mousegene_table.join(gene_table[['gene_type']], 
+    on='gene_name_id')
 
 # breeding_cage is a primary key for litter
 litter_table = litter_table.set_index('breeding_cage_id')
@@ -46,6 +50,7 @@ else:
 # Get the genotype
 # This recapitulates the logic from colony.Mouse
 mousegenes = mousegene_table[mousegene_table.mouse_name_id == mouse.id]
+mousegenes = mousegenes.sort_values('gene_type')
 if len(mousegenes) == 0 and mouse.wild_type:
     new_mouse_genotype = 'pure WT'
 else:
@@ -91,13 +96,22 @@ if len(qs) > 0:
     print "mouse already exists; error checking"
     existing_mouse = qs.first()
 
+    changes_made = False
     for django_field_name, value in params.items():
         # Check whether value set correctly
-        existing_value = existing_mouse.__getattribute__(django_field_name)
-        if existing_value != value:
-            print "warning: %s is %s not %s" % (django_field_name,
-                str(existing_value), str(value))
+        existing_value = existing_mouse.__getattribute__(
+            django_field_name)
         
+        if existing_value != value:
+            resp = raw_input("warning: %s is %s not %s; set? [y/N]" % (django_field_name,
+                str(existing_value), str(value)))
+            
+            if resp.upper() == 'Y':
+                existing_mouse.__setattr__(django_field_name, value)
+                changes_made = True
+    
+    if changes_made:
+        existing_mouse.save()
         # Could set here using __setattr__
 
 else:
