@@ -176,6 +176,7 @@ class MyApp(QtGui.QMainWindow, Ui_MainWindow):
                 else:
                     return False
             
+            sandboxes = filter(is_after_4am, sandboxes)
             saved_sandboxes = filter(is_after_4am, saved_sandboxes)
         
             # Get the pushbutton
