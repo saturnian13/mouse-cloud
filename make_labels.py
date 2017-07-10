@@ -89,8 +89,8 @@ def draw_label(label, width, height, obj):
 #~ cage_name_l = ['Purple2', 'Purple3', 'Pink',]
 
 # Directly specify the cages we need
-water_restriction_cage_name_l = ['CR6',]
-cage_card_cage_name_l = ['CR6',]
+water_restriction_cage_name_l = ['CR18',]
+cage_card_cage_name_l = ['CR18',]
 cage_name_l = water_restriction_cage_name_l + cage_card_cage_name_l
 cage_name_l = list(np.unique(cage_name_l))
     

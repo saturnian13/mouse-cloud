@@ -9,10 +9,10 @@ import json
 
 
 # Which mouse to get and what info to assign
-husbandry_name = '3108-9'
-headplate_color = 'SS'
-training_name = 'KM127'
-training_number = 127
+husbandry_name = '3116-6'
+headplate_color = 'OO'
+training_name = 'KF136'
+training_number = 136
 
 # Connect to the master database
 master_credentials_path = os.path.expanduser(
