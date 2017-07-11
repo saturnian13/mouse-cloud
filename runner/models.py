@@ -85,6 +85,11 @@ class Mouse(models.Model):
     default_board = models.CharField(max_length=50, null=True, blank=True)
     default_box = models.CharField(max_length=50, null=True, blank=True)
 
+    # This is both a Python parameter and a C parameter
+    # Downstream logic will have to generate '1' for the C parameter
+    # This takes precedence over the equivalent parameter on Board
+    use_ir_detector = models.NullBooleanField()
+
     # Make this an autoslugfield so we can order by it
     @property
     def name_number(self):
