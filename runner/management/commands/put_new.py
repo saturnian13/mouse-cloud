@@ -61,8 +61,9 @@ class Command(NoArgsCommand):
             try:
                 with file(os.path.join(script_dir, 'logfiles', 'results')) as fp:
                     results = json.load(fp)   
-            except IOError:
+            except (IOError, ValueError):
                 # no results
+                print "warning: cannot load results json in %s" % script_dir
                 results = {}
 
             # Manually put in some stuff for perfdf if not stored
