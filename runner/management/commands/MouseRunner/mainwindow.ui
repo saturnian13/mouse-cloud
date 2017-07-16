@@ -14,34 +14,11 @@
    <string>Mouse Runner</string>
   </property>
   <widget class="QWidget" name="centralWidget">
-   <widget class="QLabel" name="label">
-    <property name="geometry">
-     <rect>
-      <x>0</x>
-      <y>830</y>
-      <width>59</width>
-      <height>17</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Notes</string>
-    </property>
-   </widget>
-   <widget class="QTextEdit" name="results_window">
-    <property name="geometry">
-     <rect>
-      <x>50</x>
-      <y>830</y>
-      <width>681</width>
-      <height>31</height>
-     </rect>
-    </property>
-   </widget>
    <widget class="QTableWidget" name="daily_plan_table">
     <property name="geometry">
      <rect>
       <x>20</x>
-      <y>80</y>
+      <y>30</y>
       <width>951</width>
       <height>721</height>
      </rect>
@@ -218,57 +195,18 @@
      </property>
     </item>
    </widget>
-   <widget class="QPushButton" name="pushButton">
-    <property name="geometry">
-     <rect>
-      <x>740</x>
-      <y>40</y>
-      <width>131</width>
-      <height>31</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Load from day</string>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="pushButton_2">
-    <property name="geometry">
-     <rect>
-      <x>750</x>
-      <y>840</y>
-      <width>131</width>
-      <height>27</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Save and Exit</string>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="pushButton_3">
-    <property name="geometry">
-     <rect>
-      <x>750</x>
-      <y>810</y>
-      <width>131</width>
-      <height>27</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Save and Continue</string>
-    </property>
-   </widget>
    <widget class="QLabel" name="label_3">
     <property name="geometry">
      <rect>
       <x>380</x>
-      <y>40</y>
+      <y>0</y>
       <width>151</width>
       <height>31</height>
      </rect>
     </property>
     <property name="font">
      <font>
-      <pointsize>14</pointsize>
+      <pointsize>10</pointsize>
       <underline>false</underline>
      </font>
     </property>
@@ -280,14 +218,14 @@
     <property name="geometry">
      <rect>
       <x>540</x>
-      <y>40</y>
+      <y>0</y>
       <width>141</width>
       <height>31</height>
      </rect>
     </property>
     <property name="font">
      <font>
-      <pointsize>14</pointsize>
+      <pointsize>10</pointsize>
       <underline>false</underline>
      </font>
     </property>
@@ -299,14 +237,14 @@
     <property name="geometry">
      <rect>
       <x>160</x>
-      <y>40</y>
+      <y>0</y>
       <width>161</width>
       <height>30</height>
      </rect>
     </property>
     <property name="font">
      <font>
-      <pointsize>14</pointsize>
+      <pointsize>10</pointsize>
       <underline>false</underline>
      </font>
     </property>
@@ -318,19 +256,95 @@
     <property name="geometry">
      <rect>
       <x>20</x>
-      <y>40</y>
+      <y>0</y>
       <width>151</width>
       <height>31</height>
      </rect>
     </property>
     <property name="font">
      <font>
-      <pointsize>14</pointsize>
+      <pointsize>10</pointsize>
       <underline>false</underline>
      </font>
     </property>
     <property name="text">
      <string>Today's Date:</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_5">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>760</y>
+      <width>151</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>10</pointsize>
+      <underline>false</underline>
+     </font>
+    </property>
+    <property name="text">
+     <string>Attached boxes:</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="attached_boxes_display">
+    <property name="geometry">
+     <rect>
+      <x>180</x>
+      <y>760</y>
+      <width>611</width>
+      <height>30</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>10</pointsize>
+      <underline>false</underline>
+     </font>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_6">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>790</y>
+      <width>151</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>10</pointsize>
+      <underline>false</underline>
+     </font>
+    </property>
+    <property name="text">
+     <string>Attached cameras:</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="attached_cameras_display">
+    <property name="geometry">
+     <rect>
+      <x>180</x>
+      <y>790</y>
+      <width>611</width>
+      <height>30</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>10</pointsize>
+      <underline>false</underline>
+     </font>
+    </property>
+    <property name="text">
+     <string/>
     </property>
    </widget>
   </widget>
