@@ -220,9 +220,9 @@ class MyApp(QtGui.QMainWindow, Ui_MainWindow):
             else:
                 new_mice.append(mouse)
         
-        # Sort the sessions by time
+        # Sort the sessions by board, and then time
         previous_sessions = sorted(previous_sessions, 
-            key=lambda s: s.date_time_start)
+            key=lambda s: (s.board.name, s.date_time_start))
         
         # Get the choices for box and board
         box_l = sorted([box.name for box in runner.models.Box.objects.all()])
