@@ -193,6 +193,9 @@ class MyApp(QtGui.QMainWindow, Ui_MainWindow):
                 else:
                     # Not started
                     pass
+        
+        self.attached_boxes_display.setText('asdf')
+        self.attached_cameras_display.setText('fdsa')
     
     def set_table_data(self):
         # Date of most recent session
