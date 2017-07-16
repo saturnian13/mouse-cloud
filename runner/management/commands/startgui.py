@@ -20,6 +20,7 @@ import subprocess
 
 from django.core.management.base import NoArgsCommand
 
+ROW_HEIGHT = 20
 
 def probe_arduino_user(arduino):
     """Checks if any programs are using /dev/ttyACM*
@@ -238,8 +239,11 @@ class MyApp(QtGui.QMainWindow, Ui_MainWindow):
         # 7 - Performance, read only
         # 8 - Pipe stop, read only
 
-        self.daily_plan_table.setRowCount(len(previous_sessions) + 1)
+        self.daily_plan_table.setRowCount(len(previous_sessions))
         for nrow, session in enumerate(previous_sessions):
+            # Set the row height
+            self.daily_plan_table.setRowHeight(nrow, ROW_HEIGHT)
+            
             # Mouse name, read only
             item = QTableWidgetItem(session.mouse.name)
             item.setFlags(item.flags() ^ QtCore.Qt.ItemIsEditable)
@@ -327,6 +331,9 @@ class MyApp(QtGui.QMainWindow, Ui_MainWindow):
         First inserts a new row at position new_row.
         Then copies all data.
         Then deletes old_row.
+        
+        TODO: don't create or remove rows, just set the items in order
+        to swap them
         """
         # Keep track of the current column
         current_column = self.daily_plan_table.currentColumn()
@@ -341,6 +348,7 @@ class MyApp(QtGui.QMainWindow, Ui_MainWindow):
 
         # Insert a new row
         self.daily_plan_table.insertRow(new_row)
+        self.daily_plan_table.setRowHeight(new_row, ROW_HEIGHT)
             
         # Copy the contents
         for ncol in range(self.daily_plan_table.columnCount()):
@@ -362,7 +370,11 @@ class MyApp(QtGui.QMainWindow, Ui_MainWindow):
         self.daily_plan_table.setCurrentCell(new_row, current_column)
         
         # Delete the old row
-        self.daily_plan_table.removeRow(old_row)             
+        self.daily_plan_table.removeRow(old_row)        
+
+        # Fix the numbering of the rows
+        self.daily_plan_table.setVerticalHeaderLabels(
+            [str(n + 1) for n in range(self.daily_plan_table.rowCount())])
 
     def move_down(self):
         # http://stackoverflow.com/questions/9166087/move-row-up-and-down-in-pyqt4
