@@ -17,10 +17,11 @@ import ArduFSM.Runner.start_runner_cli
 import pytz
 import glob
 import subprocess
+import numpy as np
 
 from django.core.management.base import NoArgsCommand
 
-ROW_HEIGHT = 20
+ROW_HEIGHT = 18
 
 def probe_arduino_user(arduino):
     """Checks if any programs are using /dev/ttyACM*
@@ -194,8 +195,44 @@ class MyApp(QtGui.QMainWindow, Ui_MainWindow):
                     # Not started
                     pass
         
-        self.attached_boxes_display.setText('asdf')
-        self.attached_cameras_display.setText('fdsa')
+        # Poll attached boxes
+        attached_arduinos = []
+        attached_cameras = []
+        zobj = zip(self.relevant_box_names, self.relevant_box_arduinos,
+            self.relevant_box_cameras)
+            
+        for box_name, arduino, camera in zobj:
+            if os.path.exists(arduino):
+                attached_arduinos.append(arduino)
+
+            if os.path.exists(camera):
+                attached_cameras.append(camera)
+        
+        # Format into something like "ACM0 (B0 or B1)"
+        attached_arduino_strings = []
+        for arduino in np.unique(attached_arduinos):
+            matching_box_names = [self.relevant_box_names[n] 
+                for n in range(len(self.relevant_box_arduinos))
+                if self.relevant_box_arduinos[n] == arduino 
+            ]
+            arduino_status, pid_string = probe_arduino_user(arduino)
+            attached_arduino_strings.append('%s (%s; %s)' % (
+                arduino[-4:], arduino_status, '/'.join(matching_box_names)))
+
+        # Format into something like "video0 (B0 or B1)"
+        attached_camera_strings = []
+        for camera in np.unique(attached_cameras):
+            matching_box_names = [self.relevant_box_names[n] 
+                for n in range(len(self.relevant_box_cameras))
+                if self.relevant_box_cameras[n] == camera 
+            ]
+            attached_camera_strings.append('%s (%s)' % (
+                camera[-6:], '/'.join(matching_box_names)))
+        
+        self.attached_boxes_display.setText(
+            '\n'.join(attached_arduino_strings))
+        self.attached_cameras_display.setText(
+            '\n'.join(attached_camera_strings))
     
     def set_table_data(self):
         # Date of most recent session
@@ -228,8 +265,20 @@ class MyApp(QtGui.QMainWindow, Ui_MainWindow):
             key=lambda s: (s.board.name, s.date_time_start))
         
         # Get the choices for box and board
-        box_l = sorted([box.name for box in runner.models.Box.objects.all()])
-        board_l = sorted([board.name for board in runner.models.Board.objects.all()])
+        box_l = sorted(np.unique(
+            [session.box.name for session in previous_sessions]))
+        board_l = sorted(np.unique(
+            [session.board.name for session in previous_sessions]))
+        
+        # Get box arduinos and cameras for polling
+        self.relevant_box_names = []
+        self.relevant_box_arduinos = []
+        self.relevant_box_cameras = []
+        for box_name in box_l:
+            box = runner.models.Box.objects.filter(name=box_name).first()
+            self.relevant_box_names.append(box_name)
+            self.relevant_box_arduinos.append(box.serial_port)
+            self.relevant_box_cameras.append(box.video_device)
         
         # Set every row with the same widgets
         # 0 - Mouse, read only
