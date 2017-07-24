@@ -21,7 +21,7 @@ import numpy as np
 
 from django.core.management.base import NoArgsCommand
 
-ROW_HEIGHT = 18
+ROW_HEIGHT = 20
 
 def probe_arduino_user(arduino):
     """Checks if any programs are using /dev/ttyACM*
