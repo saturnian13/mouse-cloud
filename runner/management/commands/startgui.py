@@ -265,10 +265,14 @@ class MyApp(QtGui.QMainWindow, Ui_MainWindow):
             key=lambda s: (s.board.name, s.date_time_start))
         
         # Get the choices for box and board
-        box_l = sorted(np.unique(
-            [session.box.name for session in previous_sessions]))
-        board_l = sorted(np.unique(
-            [session.board.name for session in previous_sessions]))
+        box_l = sorted(
+            runner.models.Box.objects.all().values_list('name', flat=True))
+        board_l = sorted(
+            runner.models.Board.objects.all().values_list('name', flat=True))
+        #~ box_l = sorted(np.unique(
+            #~ [session.box.name for session in previous_sessions]))
+        #~ board_l = sorted(np.unique(
+            #~ [session.board.name for session in previous_sessions]))
         
         # Get box arduinos and cameras for polling
         self.relevant_box_names = []
