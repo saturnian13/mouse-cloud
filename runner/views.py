@@ -81,7 +81,9 @@ def weight_plot(request):
         
         # Plot
         ax.plot(cohort_weights.values, marker='s', ls='-')
-        ax.set_ylim((14, 30))
+        ax.set_ylim((10, 30))
+        ax.set_yticks(range(10, 31, 2))
+        ax.grid()
         
         # Xticks are the formatted date
         ax.set_xticks(range(len(cohort_weights)))
