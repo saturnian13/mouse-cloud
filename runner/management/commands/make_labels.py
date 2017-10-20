@@ -11,14 +11,14 @@ class Command(NoArgsCommand):
         # Get the cages
         prompt = ('Enter a list of cage names, separated by spaces, for'
             'which you need water restriction labels.\n'
-            'Example: CR22 CR12 CR13. '
+            'Example: CR22 CR12 CR13\n'
         )
         data = raw_input(prompt)
         water_restriction_cage_name_l = data.split()
         
         prompt = ('Enter a list of cage names, separated by spaces, for'
             'which you need cage labels.\n'
-            'Example: CR22 CR12 CR13. '
+            'Example: CR22 CR12 CR13\n'
         )
         data = raw_input(prompt)
         cage_card_cage_name_l = data.split()
@@ -27,7 +27,7 @@ class Command(NoArgsCommand):
             'second from top row, enter 2: '
         )      
         data = raw_input(prompt)
-        rowstart = int(data)
+        row_start = int(data)
         
         specs = labels.Specification(215.9, 279.4, 2, 15, 87.3, 16.9, corner_radius=2,
             row_gap=0, column_gap=13.3)
@@ -99,8 +99,6 @@ class Command(NoArgsCommand):
 
 
         # Directly specify the cages we need
-        water_restriction_cage_name_l = ['CR22', 'CR12', 'CR13',]
-        cage_card_cage_name_l = ['CR22',]
         cage_name_l = water_restriction_cage_name_l + cage_card_cage_name_l
         cage_name_l = list(np.unique(cage_name_l))
             
