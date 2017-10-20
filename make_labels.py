@@ -77,20 +77,9 @@ def draw_label(label, width, height, obj):
                 **kwargs))
 
 
-#~ # Determine which cages to include
-#~ cage_name_l = []
-#~ skip_cage_l = ['Green', 'Blue']
-#~ for cage in colony.models.ChrisCage.objects.all():
-    #~ if cage.chrismouse_set.count() == 0:
-        #~ continue
-    #~ if cage.name in skip_cage_l:
-        #~ continue
-    #~ cage_name_l.append(cage.name)
-#~ cage_name_l = ['Purple2', 'Purple3', 'Pink',]
-
 # Directly specify the cages we need
-water_restriction_cage_name_l = ['CR19', 'CR20',]
-cage_card_cage_name_l = ['CR19', 'CR20',]
+water_restriction_cage_name_l = ['CR22', 'CR12', 'CR13',]
+cage_card_cage_name_l = ['CR22',]
 cage_name_l = water_restriction_cage_name_l + cage_card_cage_name_l
 cage_name_l = list(np.unique(cage_name_l))
     
@@ -125,7 +114,7 @@ sheet = labels.Sheet(specs, draw_label, border=False)
 
 # Define the used labels
 used_labels = []
-for row in range(1, 2): # second number is the 1-based row to start on
+for row in range(1, 5): # second number is the 1-based row to start on
     for col in range(1, 3):
         used_labels.append((row, col))
 sheet.partial_page(1, used_labels)
