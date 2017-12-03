@@ -72,6 +72,7 @@ class Mouse(models.Model):
     timeout = models.IntegerField(null=True, blank=True, default=2000)
     scheduler = models.CharField(max_length=50, blank=True)
     max_rewards_per_trial = models.IntegerField(null=True, blank=True, default=1)
+    target_water_volume = models.IntegerField(default=5000)
     
     # C params
     # must be strings
