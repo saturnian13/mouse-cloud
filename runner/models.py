@@ -121,6 +121,8 @@ class Box(models.Model):
     name = models.CharField(max_length=20)
     l_reward_duration = models.IntegerField()
     r_reward_duration = models.IntegerField(null=True, blank=True)
+    l_reward_sensitivity = models.FloatField(null=True, blank=True)
+    r_reward_sensitivity = models.FloatField(null=True, blank=True)
     serial_port = models.CharField(max_length=20)
     video_device = models.CharField(max_length=20, null=True, blank=True)
     
