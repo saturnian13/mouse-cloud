@@ -358,6 +358,9 @@ class OptoSession(models.Model):
     fiber_diameter = models.FloatField(null=True, blank=True)
     notes = models.TextField(null=True, blank=True)
     sham = models.NullBooleanField(null=True, blank=True)
+    position_notes = models.TextField(blank=True,
+        help_text='Notes on position relative to brain or electrode'
+    )
     
     @property
     def info(self):

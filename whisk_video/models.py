@@ -28,7 +28,7 @@ class VideoSession(models.Model):
     frame_height = models.IntegerField(null=True, blank=True, default=550)
     frame_width = models.IntegerField(null=True, blank=True, default=640)
     frame_rate = models.FloatField(null=True, blank=True, default=200.0)
-    lens_fstop = models.FloatField(null=True, blank=True, default=5.0)
+    lens_fstop = models.FloatField(null=True, blank=True)
     imaq_exposure_time = models.FloatField(null=True, blank=True, default=150.0)
     imaq_digital_gain = models.IntegerField(null=True, blank=True, default=2)
     imaq_digital_offset = models.IntegerField(null=True, blank=True, default=-600)
