@@ -25,7 +25,7 @@ class NeuralSession(models.Model):
     
     # Recording number, if there is only one
     recording_number = models.IntegerField(null=True, blank=True,
-        'main recording number to analyze')
+        help_text='main recording number to analyze')
 
     # Sort name
     # Probably this means "the sort to use for data analysis", because
