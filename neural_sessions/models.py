@@ -22,6 +22,10 @@ class NeuralSession(models.Model):
     # I guess there will be multiple NeuralSessionEpoch objects that link
     # to this, each with their own information
     notes = models.TextField(blank=True)
+    
+    # Recording number, if there is only one
+    recording_number = models.IntegerField(null=True, blank=True,
+        'main recording number to analyze')
 
     # Sort name
     # Probably this means "the sort to use for data analysis", because
@@ -53,6 +57,14 @@ class NeuralSession(models.Model):
 
     manipulator_angle = models.FloatField(null=True, blank=True,
         help_text='Angle of the manipulator from vertical'
+    )
+    
+    ain_backlight = models.IntegerField(null=True, blank=True, default=0,
+        help_text='0-based AIN channel number of backlight signal (add to 71)'
+    )
+
+    ain_opto = models.IntegerField(null=True, blank=True, default=1,
+        help_text='0-based AIN channel number of opto signal (add to 71)'
     )
     
     z_touch = models.FloatField(null=True, blank=True,
