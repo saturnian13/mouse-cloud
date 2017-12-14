@@ -6,9 +6,11 @@ import neural_sessions.models
 class NeuralSessionInline(admin.StackedInline):
     """For a tab within GrandSession"""
     model = neural_sessions.models.NeuralSession
-    fields = (
-        'name', 'sort_name',
-    )
+    
+    # If fields unspecified, all are displayed
+    #~ fields = (
+        #~ 'name', 'sort_name',
+    #~ )
     
     suit_classes = 'suit-tab suit-tab-neural'
 
