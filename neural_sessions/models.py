@@ -44,6 +44,7 @@ class NeuralSession(models.Model):
     ## Online notes
     # e.g., ON4
     adapter = models.CharField(max_length=30, blank=True)
+    electrode = models.CharField(max_length=30, blank=True)
     
     # comma separated list
     exclude_channels = models.CharField(max_length=100, blank=True,
