@@ -17,20 +17,25 @@ class NeuralSession(models.Model):
     data_directory = models.CharField(max_length=200, blank=True)
     
     # Online notes
-    # For now, put notes here about recording numbers, start/stop, etc
-    # Not sure how this will ultimately be handled
-    # I guess there will be multiple NeuralSessionEpoch objects that link
-    # to this, each with their own information
     notes = models.TextField(blank=True)
-    
+
+    # Deprecated
     # Recording number, if there is only one
     recording_number = models.IntegerField(null=True, blank=True,
-        help_text='main recording number to analyze')
+        help_text='main recording number to analyze (deprecated)')
+
+    # Comma separated list of recording numbers to sort together
+    # So if there are separte recordings 1,2 then concatenate these
+    # Probably also need a way to deal with a single recording consisting
+    # of multiple epochs
+    recording_numbers = models.CharField(max_length=20, blank=True,
+        help_text='comma separated list of included recording numbers')
 
     # Sort name
     # Probably this means "the sort to use for data analysis", because
     # multiple sorts may exist.
     sort_name = models.CharField(max_length=200, blank=True)
+
 
     ## Links
     # Link it to a behavioral session
