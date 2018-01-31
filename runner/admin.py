@@ -82,9 +82,11 @@ class BehavioralSessionInline(admin.StackedInline):
 class OptoSessionInline(admin.StackedInline):
     """Inlined information about OptoSession in a behavioral Session"""
     model = OptoSession
-    fields = ('notes', 'sham', 'target', 'target_orientation',
-        'start_power', 'stop_power', 'wavelength', 'fiber_diameter',
-    )
+    
+    # If fields unspecified, all will be shown
+    #~ fields = ('notes', 'sham', 'target', 'target_orientation',
+        #~ 'start_power', 'stop_power', 'wavelength', 'fiber_diameter',
+    #~ )
     
     # Put it on the opto tab
     suit_classes = 'suit-tab suit-tab-opto'
