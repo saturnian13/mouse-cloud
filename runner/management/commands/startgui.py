@@ -19,7 +19,7 @@ import glob
 import subprocess
 import numpy as np
 
-from django.core.management.base import NoArgsCommand
+from django.core.management.base import BaseCommand
 
 ROW_HEIGHT = 23
 
@@ -444,8 +444,8 @@ class MyApp(QtGui.QMainWindow, Ui_MainWindow):
             self.move_row(row + 1, row - 1)
 
 
-class Command(NoArgsCommand):
-    def handle_noargs(self, **options):
+class Command(BaseCommand):
+    def handle(self, **options):
         app = QtGui.QApplication(sys.argv)
         window = MyApp()
         window.show()
