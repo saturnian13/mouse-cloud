@@ -5,7 +5,7 @@ import os
 import shutil
 import json
 import subprocess
-from django.core.management.base import NoArgsCommand
+from django.core.management.base import BaseCommand
 import ArduFSM.Runner
 
 def get_user_input_from_keyboard():
@@ -77,8 +77,8 @@ def run():
         )
 
 
-class Command(NoArgsCommand):
-    def handle_noargs(self, **options):
+class Command(BaseCommand):
+    def handle(self, **options):
         run()
 
 if __name__ == "__main__":
