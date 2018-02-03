@@ -26,6 +26,9 @@ ROW_HEIGHT = 23
 def probe_arduino_user(arduino):
     """Checks if any programs are using /dev/ttyACM*
     
+    This can be very slow if there are broken network mounts, for some
+    reason.
+    
     Returns: result, pid_string
         result: a string
             'in use' : the arduino is in use
@@ -146,6 +149,7 @@ class MyApp(QtGui.QMainWindow, Ui_MainWindow):
         """Poll sessions that have run and update row colors"""
         now = datetime.datetime.now()
         date_string = now.strftime('%Y-%m-%d')
+        
         for nrow in range(self.daily_plan_table.rowCount()):
             # Get the mouse in this row
             mouse_name_item = self.daily_plan_table.item(nrow, 0)
