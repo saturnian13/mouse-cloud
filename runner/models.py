@@ -132,6 +132,7 @@ class Box(models.Model):
     gui_window_position_y = models.IntegerField(null=True, blank=True)
     window_position_IR_plot_x = models.IntegerField(null=True, blank=True)
     window_position_IR_plot_y = models.IntegerField(null=True, blank=True)
+    subprocess_window_xpos = models.IntegerField(null=True, blank=True)
     subprocess_window_ypos = models.IntegerField(null=True, blank=True)
     
     video_brightness = models.IntegerField(null=True, blank=True)
