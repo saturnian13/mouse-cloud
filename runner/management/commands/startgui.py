@@ -151,7 +151,11 @@ class MyApp(QtGui.QMainWindow, Ui_MainWindow):
         self.timer.start(6000)
     
     def poll_sessions(self):
-        """Poll sessions that have run and update row colors"""
+        """Poll sessions that have run and update row colors
+        
+        We don't have a list of sandboxes that were created, so just look
+        for anything with today's date.
+        """
         now = datetime.datetime.now()
         date_string = now.strftime('%Y-%m-%d')
         
@@ -163,9 +167,12 @@ class MyApp(QtGui.QMainWindow, Ui_MainWindow):
             mouse_name = mouse_name_item.text()
             
             # Check if sandbox exists
+            # Use EYM format here
             sandboxes = glob.glob(os.path.join(sandbox_root, 
+                '*', now.year, '%02d' % now.month, # EYM
                 '%s-*-%s-*' % (date_string, mouse_name)))
             saved_sandboxes = glob.glob(os.path.join(sandbox_root, 
+                '*', now.year, '%02d' % now.month, # EYM
                 '%s-*-%s-*-saved' % (date_string, mouse_name)))  
             
             # Ignore if it was before 4AM
