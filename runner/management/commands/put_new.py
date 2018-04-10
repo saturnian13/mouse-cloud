@@ -31,17 +31,19 @@ class Command(NoArgsCommand):
     def handle_noargs(self, **options):
         # get new records
         PATHS = MCwatch.behavior.db.get_paths()
-        bdf = MCwatch.behavior.db.search_for_behavior_files(
-            behavior_dir=PATHS['behavior_dir'],
-            clean=True)
+        bdf = MCwatch.behavior.db.get_behavior_df()
         perfdf = MCwatch.behavior.db.get_perf_metrics()
 
+        # Drop those without a sandbox name (pre-sandbox)
+        bdf = bdf[~bdf['sandbox'].isnull()]
+        
+        # Find sessions that are not in mouse-cloud yet
+        sessions_in_db = list(runner.models.Session.objects.values_list(
+            'name', flat=True))
+        sessions_to_add = bdf.loc[~bdf['session'].isin(sessions_in_db), :]
 
-        for idx, logfile in bdf['filename'].iteritems():
-            # If it's already in the database, then skip
+        for idx, logfile in sessions_to_add['filename'].iteritems():
             session_name = bdf.loc[idx, 'session']
-            if len(runner.models.Session.objects.filter(name=session_name)) > 0:
-                continue
             
             # Get the sandbox directory from the logfile
             script_dir = split_once(split_once(logfile))
