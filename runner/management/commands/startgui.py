@@ -95,7 +95,7 @@ def create_combo_box(choice_l, index=None, choice=None):
         qcb.setCurrentIndex(choice_l.index(choice))
     return qcb
 
-def call_external(mouse, board, box, experimenter, **other_python_parameters):
+def call_external(mouse, board, box, **other_python_parameters):
     # Make sure the arduino is available
     box_obj = runner.models.Box.objects.filter(name=box).first()
     arduino = box_obj.serial_port
@@ -169,10 +169,10 @@ class MyApp(QtGui.QMainWindow, Ui_MainWindow):
             # Check if sandbox exists
             # Use EYM format here
             sandboxes = glob.glob(os.path.join(sandbox_root, 
-                '*', now.year, '%02d' % now.month, # EYM
+                '*', str(now.year), '%02d' % now.month, # EYM
                 '%s-*-%s-*' % (date_string, mouse_name)))
             saved_sandboxes = glob.glob(os.path.join(sandbox_root, 
-                '*', now.year, '%02d' % now.month, # EYM
+                '*', str(now.year), '%02d' % now.month, # EYM
                 '%s-*-%s-*-saved' % (date_string, mouse_name)))  
             
             # Ignore if it was before 4AM
