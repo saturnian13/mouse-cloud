@@ -236,6 +236,8 @@ class MouseAdmin(admin.ModelAdmin):
     ]
     ordering = ['-in_training', 'number']
     list_editable = ['in_training', 'training_cohort']
+    
+    list_filter = ['experimenter', 'in_training']
 
 class DailyPlanAdmin(admin.ModelAdmin):
     list_display = ['date_time_start']
