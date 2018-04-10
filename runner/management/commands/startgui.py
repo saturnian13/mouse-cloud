@@ -95,11 +95,15 @@ def create_combo_box(choice_l, index=None, choice=None):
         qcb.setCurrentIndex(choice_l.index(choice))
     return qcb
 
-def call_external(mouse, board, box, **other_python_parameters):
+def call_external(mouse, board, box, experimenter, **other_python_parameters):
     # Make sure the arduino is available
     box_obj = runner.models.Box.objects.filter(name=box).first()
     arduino = box_obj.serial_port
     result, pid_string = probe_arduino_user(arduino)
+    
+    # Get experimenter from mouse object
+    experimenter = runner.models.Mouse.objects.filter(
+        name=mouse).first().get_experimenter_display()
     
     if result == 'in use':
         print "cannot upload to box %s; in use by these PIDs: %s" % (
@@ -109,8 +113,9 @@ def call_external(mouse, board, box, **other_python_parameters):
         print "cannot upload to box %s: %s" % (box, result)
         return
     
-    print mouse, board, box
+    print mouse, board, box, experimenter
     ArduFSM.Runner.start_runner_cli.main(mouse=mouse, board=board, box=box,
+        experimenter=experimenter,
         **other_python_parameters)
 
 class MyApp(QtGui.QMainWindow, Ui_MainWindow):
