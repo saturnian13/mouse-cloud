@@ -14,7 +14,7 @@ class Command(NoArgsCommand):
         husbandry_name = raw_input('Enter husbandry name (e.g., 3126-3): ')
         headplate_color = raw_input('Enter headplate color (e.g., RB): ')
         training_name = raw_input('Enter training name (e.g., KF145): ')
-        training_number = int(raw_input('Enter training name (e.g., 145): '))
+        training_number = int(raw_input('Enter training number (e.g., 145): '))
 
         # Connect to the master database
         master_credentials_path = os.path.expanduser(
@@ -124,6 +124,7 @@ class Command(NoArgsCommand):
                 husbandry_name=mouse['name'],
                 sex=mouse.sex,
                 headplate_color=headplate_color,
+                experimenter=0,
             )
 
             # Set in new object
