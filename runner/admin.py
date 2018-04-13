@@ -135,8 +135,10 @@ class GrandSessionAdmin(admin.ModelAdmin):
     ]
     
     list_filter = [
+        'session__mouse',
         TaggitListFilter,
     ]
+    
     
     ## Callables for the list display (usual __ syntax doesn't work here)
     def neuralsession__name(self, obj):
