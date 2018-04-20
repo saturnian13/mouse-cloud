@@ -33,6 +33,10 @@ def run():
     # Get session parameters from user (board number, etc)
     user_input = get_user_input_from_keyboard()
 
+    # Get experimenter from mouse name
+    user_input['experimenter'] = runner.models.Mouse.objects.filter(
+        name=user_input['mouse']).first().get_experimenter_display()
+
     # Look up the specific parameters
     specific_parameters = ArduFSM.Runner.ParamLookups.base.\
         get_specific_parameters_from_user_input(user_input)
