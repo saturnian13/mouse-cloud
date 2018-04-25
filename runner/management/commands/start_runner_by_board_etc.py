@@ -7,6 +7,7 @@ import json
 import subprocess
 from django.core.management.base import BaseCommand
 import ArduFSM.Runner
+import runner.models
 
 def get_user_input_from_keyboard():
     """Get user to type the board, box, and mouse"""
