@@ -4,3 +4,5 @@ staticfiles
 
 # CR: for local settings
 local_cache
+
+auto_created_labels.pdf
