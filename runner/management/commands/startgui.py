@@ -23,6 +23,10 @@ from django.core.management.base import BaseCommand
 
 ROW_HEIGHT = 23
 
+# These are the boxes to display and the order to display them in the runner
+# Also affects the boxes that are shown in the "attached boxes" renderer
+LOCALE_BOXES = ['CR1', 'CR2', 'J2', 'CR6', 'CR3', 'J3', 'CR4']
+
 def probe_arduino_user(arduino):
     """Checks if any programs are using /dev/ttyACM*
     
@@ -266,9 +270,11 @@ class MyApp(QtGui.QMainWindow, Ui_MainWindow):
         previous_sessions = []
         new_mice = []
         for mouse in mice_qs.all():
-            # Find previous sessions
+            # Find previous sessions from this mouse, including only sessions
+            # from LOCALE_BOXES
             mouse_prev_sess_qs = runner.models.Session.objects.filter(
-                mouse=mouse).order_by('date_time_start')
+                mouse=mouse, box__name__in=LOCALE_BOXES).order_by(
+                'date_time_start')
             
             # Store the most recent, or if None, add to new_mice
             if mouse_prev_sess_qs.count() > 0:
@@ -281,8 +287,9 @@ class MyApp(QtGui.QMainWindow, Ui_MainWindow):
             key=lambda s: (s.board.name, s.date_time_start))
         
         # Get the choices for box and board
-        box_l = sorted(
-            runner.models.Box.objects.all().values_list('name', flat=True))
+        #~ box_l = sorted(
+            #~ runner.models.Box.objects.all().values_list('name', flat=True))
+        box_l = LOCALE_BOXES
         board_l = sorted(
             runner.models.Board.objects.all().values_list('name', flat=True))
         #~ box_l = sorted(np.unique(
