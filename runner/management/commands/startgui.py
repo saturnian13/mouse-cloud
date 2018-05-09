@@ -28,6 +28,9 @@ ROW_HEIGHT = 23
 with file('LOCALE_BOXES') as fi:
     LOCALE_BOXES = [line.strip() for line in fi.readlines()]
 
+LOCALE_COLORS = ['b', 'r', 'g', 'k', 'pink', 'm', 'gray', 'white']
+LOCALE_BOX2COLOR = dict([(k, v) for k, v in zip(LOCALE_BOXES, LOCALE_COLORS)])
+
 def probe_arduino_user(arduino):
     """Checks if any programs are using /dev/ttyACM*
     
@@ -379,7 +382,14 @@ class MyApp(QtGui.QMainWindow, Ui_MainWindow):
 
     def start_session(self, row):
         """Collect data from row and pass to start session"""
+        # Highlight clicked cell
         self.daily_plan_table.setCurrentCell(row, 6)
+        
+        # Get color from box
+        box_name = str(self.daily_plan_table.cellWidget(row, 2).currentText())
+        fig_color = LOCALE_BOX2COLOR[box_name]
+        
+        # Call
         call_external(
             mouse=str(self.daily_plan_table.item(row, 0).text()),
             board=str(self.daily_plan_table.cellWidget(row, 3).currentText()),
@@ -387,6 +397,7 @@ class MyApp(QtGui.QMainWindow, Ui_MainWindow):
             #~ recent_date=str(self.target_date_display.getText()),
             recent_weight=str(self.daily_plan_table.item(row, 1).text()),
             recent_pipe=str(self.daily_plan_table.item(row, 4).text()),
+            background_color=fig_color,
         )
 
     def start_session2(self, row_qb):
