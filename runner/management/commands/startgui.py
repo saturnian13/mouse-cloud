@@ -21,20 +21,29 @@ import numpy as np
 
 from django.core.management.base import BaseCommand
 
+def readlines_and_strip(filename):
+    res = []
+    with file(filename) as fi:
+        lb_lines = fi.readlines()
+
+    for line in lb_lines:
+        sline = line.strip()
+        if sline != '':
+            res.append(sline)
+    
+    return res
+
+
 ROW_HEIGHT = 23
 
 # These are the boxes to display and the order to display them in the runner
 # Also affects the boxes that are shown in the "attached boxes" renderer
-with file('LOCALE_BOXES') as fi:
-    lb_lines = fi.readlines()
-LOCALE_BOXES = []
-for line in lb_lines:
-    sline = line.strip()
-    if sline != '':
-        LOCALE_BOXES.append(sline)
+LOCALE_BOXES = readlines_and_strip('LOCALE_BOXES')
 
 # Colors of the boxes
-LOCALE_COLORS = ['b', 'r', 'g', 'k', 'pink', 'm', 'gray', 'white']
+LOCALE_COLORS = readlines_and_strip('LOCALE_COLORS')
+if len(LOCALE_COLORS) < len(LOCALE_BOXES):
+    LOCALE_COLORS += ['white'] * (len(LOCALE_BOXES) - len(LOCALE_COLORS))
 LOCALE_BOX2COLOR = dict([(k, v) for k, v in zip(LOCALE_BOXES, LOCALE_COLORS)])
 
 def probe_arduino_user(arduino):
@@ -280,46 +289,60 @@ class MyApp(QtGui.QMainWindow, Ui_MainWindow):
             '-date_time_start')[0].date_time_start.astimezone(tz).date()
         self.target_date_display.setText(target_date.strftime('%Y-%m-%d'))
         
+        # Only include sessions from at least this recent
+        # This should be longer than the max vacation time
+        recency_cutoff = target_date - datetime.timedelta(days=21)
+        
         # Get all mice that are in training
         mice_qs = runner.models.Mouse.objects.filter(in_training=True)
         
         # Get previous session from each mouse
         previous_sessions = []
+        previous_sessions_sort_keys = []
         new_mice = []
         for mouse in mice_qs.all():
             # Find previous sessions from this mouse, including only sessions
             # from LOCALE_BOXES
             mouse_prev_sess_qs = runner.models.Session.objects.filter(
-                mouse=mouse, box__name__in=LOCALE_BOXES).order_by(
+                mouse=mouse, box__name__in=LOCALE_BOXES, 
+                date_time_start__date__gte=recency_cutoff,).order_by(
                 'date_time_start')
             
             # Store the most recent, or if None, add to new_mice
             if mouse_prev_sess_qs.count() > 0:
-                previous_sessions.append(mouse_prev_sess_qs.last())
+                # The most recent
+                sess = mouse_prev_sess_qs.last()
+                
+                # Store sess
+                previous_sessions.append(sess)
+                
+                # Store these sort keys to enable sorting
+                # Index into LOCALE_BOXES
+                previous_sessions_board_idx = LOCALE_BOXES.index(sess.box.name)
+                
+                # date time start
+                dtstart = sess.date_time_start
+                
+                # sort keys
+                previous_sessions_sort_keys.append(
+                    (previous_sessions_board_idx, dtstart))
             else:
                 new_mice.append(mouse)
         
-        # Sort the sessions by board, and then time
-        previous_sessions = sorted(previous_sessions, 
-            key=lambda s: (s.board.name, s.date_time_start))
+        # Incantantion to sort previous_sessions by sort keys
+        previous_sessions = [x for junk, x in sorted(zip(
+            previous_sessions_sort_keys, previous_sessions))]
         
         # Get the choices for box and board
-        #~ box_l = sorted(
-            #~ runner.models.Box.objects.all().values_list('name', flat=True))
         box_l = LOCALE_BOXES
         board_l = sorted(
             runner.models.Board.objects.all().values_list('name', flat=True))
-        #~ box_l = sorted(np.unique(
-            #~ [session.box.name for session in previous_sessions]))
-        #~ board_l = sorted(np.unique(
-            #~ [session.board.name for session in previous_sessions]))
         
         # Get box arduinos and cameras for polling
         self.relevant_box_names = []
         self.relevant_box_arduinos = []
         self.relevant_box_cameras = []
         for box_name in box_l:
-            print box_name
             box = runner.models.Box.objects.filter(name=box_name).first()
             self.relevant_box_names.append(box_name)
             self.relevant_box_arduinos.append(box.serial_port)
