@@ -27,6 +27,9 @@ ROW_HEIGHT = 23
 # Also affects the boxes that are shown in the "attached boxes" renderer
 LOCALE_BOXES = ['CR1', 'CR2', 'J2', 'CR6', 'CR3', 'J3', 'CR4']
 
+with file('LOCALE_BOXES') as fi:
+    LOCALE_BOXES = [line.strip() for line in fi.readlines()]
+
 def probe_arduino_user(arduino):
     """Checks if any programs are using /dev/ttyACM*
     
