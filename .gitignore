@@ -8,3 +8,5 @@ local_cache
 # for locale boxes
 LOCALE_BOXES
 LOCALE_COLORS
+
+auto_created_labels.pdf

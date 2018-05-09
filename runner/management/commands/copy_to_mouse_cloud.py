@@ -29,6 +29,7 @@ class Command(NoArgsCommand):
         mousegene_table = pandas.read_sql_table('colony_mousegene', conn).set_index('id')
         gene_table = pandas.read_sql_table('colony_gene', conn).set_index('id')
         litter_table = pandas.read_sql_table('colony_litter', conn)
+        cage_table = pandas.read_sql_table('colony_cage', conn)
 
         # Join the mousegene_table on gene_type for sorting
         mousegene_table = mousegene_table.join(gene_table[['gene_type']], 
@@ -48,6 +49,9 @@ class Command(NoArgsCommand):
             new_mouse_dob = mouse.manual_dob.date()
         else:
             print "warning: cannot get dob"
+
+        # Get the cage name
+        cage_name = cage_table.set_index('id').loc[mouse['cage_id'], 'name']
 
         # Get the genotype
         # This recapitulates the logic from colony.Mouse
@@ -117,6 +121,20 @@ class Command(NoArgsCommand):
                 # Could set here using __setattr__
 
         else:
+            # See if cage needs to be created
+            cage_qs = runner.models.BehaviorCage.objects.filter(name=cage_name)
+            if len(cage_qs) == 0:
+                # Create cage
+                print "creating cage %s" % cage_name
+                new_cage = runner.models.BehaviorCage(
+                    name=cage_name,
+                    label_color='black',
+                )
+                new_cage.save()
+            else:
+                print "found existing cage %s" % cage_name
+                new_cage = cage_qs.first()
+            
             # Create a new mouse with values copied from the old one
             new_mouse = runner.models.Mouse(
                 name=training_name,
@@ -125,6 +143,7 @@ class Command(NoArgsCommand):
                 sex=mouse.sex,
                 headplate_color=headplate_color,
                 experimenter=0,
+                cage=new_cage,
             )
 
             # Set in new object
@@ -132,7 +151,7 @@ class Command(NoArgsCommand):
             new_mouse.genotype = new_mouse_genotype
 
             # Training parameters
-            new_mouse.stimulus_set = 'trial_types_CCL_1srvpos'
+            new_mouse.stimulus_set = 'trial_types_detectCV_1srvpos'
             new_mouse.max_rewards_per_trial = 999
             new_mouse.scheduler = 'ForcedAlternationLickTrain'
             new_mouse.protocol_name = 'LickTrain'
