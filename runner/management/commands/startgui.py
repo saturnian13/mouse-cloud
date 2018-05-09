@@ -25,8 +25,6 @@ ROW_HEIGHT = 23
 
 # These are the boxes to display and the order to display them in the runner
 # Also affects the boxes that are shown in the "attached boxes" renderer
-LOCALE_BOXES = ['CR1', 'CR2', 'J2', 'CR6', 'CR3', 'J3', 'CR4']
-
 with file('LOCALE_BOXES') as fi:
     LOCALE_BOXES = [line.strip() for line in fi.readlines()]
 
