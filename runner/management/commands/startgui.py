@@ -26,8 +26,14 @@ ROW_HEIGHT = 23
 # These are the boxes to display and the order to display them in the runner
 # Also affects the boxes that are shown in the "attached boxes" renderer
 with file('LOCALE_BOXES') as fi:
-    LOCALE_BOXES = [line.strip() for line in fi.readlines()]
+    lb_lines = fi.readlines()
+LOCALE_BOXES = []
+for line in lb_lines:
+    sline = line.strip()
+    if sline != '':
+        LOCALE_BOXES.append(sline)
 
+# Colors of the boxes
 LOCALE_COLORS = ['b', 'r', 'g', 'k', 'pink', 'm', 'gray', 'white']
 LOCALE_BOX2COLOR = dict([(k, v) for k, v in zip(LOCALE_BOXES, LOCALE_COLORS)])
 
@@ -253,6 +259,13 @@ class MyApp(QtGui.QMainWindow, Ui_MainWindow):
             attached_camera_strings.append('%s (%s)' % (
                 camera[-6:], '/'.join(matching_box_names)))
         
+        # Also poll any attached arduinos that do NOT correspond to known boxes
+        for ardunum in range(10):
+            ardupath = '/dev/ttyACM%d' % ardunum
+            if ardupath not in self.relevant_box_arduinos:
+                if os.path.exists(ardupath):
+                    attached_arduino_strings.append(ardupath)
+        
         self.attached_boxes_display.setText(
             '\n'.join(attached_arduino_strings))
         self.attached_cameras_display.setText(
@@ -306,6 +319,7 @@ class MyApp(QtGui.QMainWindow, Ui_MainWindow):
         self.relevant_box_arduinos = []
         self.relevant_box_cameras = []
         for box_name in box_l:
+            print box_name
             box = runner.models.Box.objects.filter(name=box_name).first()
             self.relevant_box_names.append(box_name)
             self.relevant_box_arduinos.append(box.serial_port)
