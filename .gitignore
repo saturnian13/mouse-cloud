@@ -4,3 +4,7 @@ staticfiles
 
 # CR: for local settings
 local_cache
+
+# for locale boxes
+LOCALE_BOXES
+LOCALE_COLORS

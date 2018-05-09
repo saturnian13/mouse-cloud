@@ -38,10 +38,16 @@ ROW_HEIGHT = 23
 
 # These are the boxes to display and the order to display them in the runner
 # Also affects the boxes that are shown in the "attached boxes" renderer
-LOCALE_BOXES = readlines_and_strip('LOCALE_BOXES')
+try:
+    LOCALE_BOXES = readlines_and_strip('LOCALE_BOXES')
+except IOError:
+    LOCALE_BOXES = sorted(runner.models.Box.objects.values_list('name', flat=True))
 
 # Colors of the boxes
-LOCALE_COLORS = readlines_and_strip('LOCALE_COLORS')
+try:
+    LOCALE_COLORS = readlines_and_strip('LOCALE_COLORS')
+except IOError:
+    LOCALE_COLORS = []
 if len(LOCALE_COLORS) < len(LOCALE_BOXES):
     LOCALE_COLORS += ['white'] * (len(LOCALE_BOXES) - len(LOCALE_COLORS))
 LOCALE_BOX2COLOR = dict([(k, v) for k, v in zip(LOCALE_BOXES, LOCALE_COLORS)])
