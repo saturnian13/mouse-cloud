@@ -307,10 +307,10 @@ class MyApp(QtGui.QMainWindow, Ui_MainWindow):
         previous_sessions_sort_keys = []
         new_mice = []
         for mouse in mice_qs.all():
-            # Find previous sessions from this mouse, including only sessions
-            # from LOCALE_BOXES
+            # Find previous sessions from this mouse from all boxes,
+            # sorted by date and excluding ancient ones
             mouse_prev_sess_qs = runner.models.Session.objects.filter(
-                mouse=mouse, box__name__in=LOCALE_BOXES, 
+                mouse=mouse,
                 date_time_start__date__gte=recency_cutoff,).order_by(
                 'date_time_start')
             
@@ -318,6 +318,11 @@ class MyApp(QtGui.QMainWindow, Ui_MainWindow):
             if mouse_prev_sess_qs.count() > 0:
                 # The most recent
                 sess = mouse_prev_sess_qs.last()
+                
+                # Skip if the last session was not in LOCALE_BOXES, that is, 
+                # if it was trained on some other setup
+                if sess.box.name not in LOCALE_BOXES:
+                    continue
                 
                 # Store sess
                 previous_sessions.append(sess)
