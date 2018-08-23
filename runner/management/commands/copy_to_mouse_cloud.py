@@ -151,10 +151,11 @@ class Command(NoArgsCommand):
             new_mouse.genotype = new_mouse_genotype
 
             # Training parameters
-            new_mouse.stimulus_set = 'trial_types_detectCV_1srvpos'
+            new_mouse.stimulus_set = 'trial_types_CCL_closest'
             new_mouse.max_rewards_per_trial = 999
             new_mouse.scheduler = 'ForcedAlternationLickTrain'
             new_mouse.protocol_name = 'LickTrain'
             new_mouse.script_name = 'LickTrain.py'
+            new_mouse.use_ir_detector = False
 
             new_mouse.save()
