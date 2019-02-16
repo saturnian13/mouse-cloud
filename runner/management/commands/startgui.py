@@ -6,6 +6,11 @@ Or, reconnect all buttons after a rearrange
 
 """
 
+# If True, do not poll arduinos before uploading or in the background
+# For whatever reason this is extremely slow when there are network problems
+# A network connection is likely still required to extract training params
+MINIMIZE_NETWORKING = False
+
 import sys
 from PyQt4 import QtCore, QtGui, uic
 from PyQt4.QtGui import QTableWidgetItem, QSpinBox, QComboBox, QPushButton
@@ -128,19 +133,23 @@ def call_external(mouse, board, box, **other_python_parameters):
     # Make sure the arduino is available
     box_obj = runner.models.Box.objects.filter(name=box).first()
     arduino = box_obj.serial_port
-    result, pid_string = probe_arduino_user(arduino)
     
     # Get experimenter from mouse object
     experimenter = runner.models.Mouse.objects.filter(
         name=mouse).first().get_experimenter_display()
     
-    if result == 'in use':
-        print "cannot upload to box %s; in use by these PIDs: %s" % (
-            box, pid_string)
-        return
-    elif result != 'not in use':
-        print "cannot upload to box %s: %s" % (box, result)
-        return
+    if not MINIMIZE_NETWORKING:
+        # Check before uploading
+        result, pid_string = probe_arduino_user(arduino)
+    
+        if result == 'in use':
+            print "cannot upload to box %s; in use by these PIDs: %s" % (
+                box, pid_string)
+            return
+
+        elif result != 'not in use':
+            print "cannot upload to box %s: %s" % (box, result)
+            return
     
     print mouse, board, box, experimenter
     ArduFSM.Runner.start_runner_cli.main(mouse=mouse, board=board, box=box,
@@ -178,7 +187,7 @@ class MyApp(QtGui.QMainWindow, Ui_MainWindow):
         self.timer = QtCore.QTimer(self)
         self.timer.timeout.connect(self.poll_sessions)
         self.timer.start(6000)
-    
+
     def poll_sessions(self):
         """Poll sessions that have run and update row colors
         
@@ -260,7 +269,12 @@ class MyApp(QtGui.QMainWindow, Ui_MainWindow):
                 for n in range(len(self.relevant_box_arduinos))
                 if self.relevant_box_arduinos[n] == arduino 
             ]
-            arduino_status, pid_string = probe_arduino_user(arduino)
+            
+            if MINIMIZE_NETWORKING:
+                arduino_status = 'unk'                
+            else:
+                arduino_status, pid_string = probe_arduino_user(arduino)
+
             attached_arduino_strings.append('%s (%s; %s)' % (
                 arduino[-4:], arduino_status, '/'.join(matching_box_names)))
 
