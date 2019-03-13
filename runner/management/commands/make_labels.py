@@ -56,7 +56,7 @@ class Command(NoArgsCommand):
                 label.add(shapes.String(
                     width * .5,
                     height - 20,
-                    "LAB: BRUNO / AAAO5201. UNI: CCR2137",
+                    "BRUNO LAB   AAAY8462   UNI: CCR2137",
                     **kwargs))
                 
                 label.add(shapes.Line(

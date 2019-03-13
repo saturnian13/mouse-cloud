@@ -45,7 +45,7 @@ class Mouse(models.Model):
     dob = models.DateField(blank=True, null=True)
     notes = models.TextField(blank=True)    
     sack_date = models.DateField('sac date', blank=True, null=True)
-    EXPERIMENTER_CHOICES = ((0, 'chris'), (1, 'jung'))
+    EXPERIMENTER_CHOICES = ((0, 'chris'), (1, 'jung'), (2, 'rikki'))
     experimenter = models.IntegerField(choices=EXPERIMENTER_CHOICES)
     
     # We copy these data as a string, rather than creating a cascade

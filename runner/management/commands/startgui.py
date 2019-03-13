@@ -6,6 +6,11 @@ Or, reconnect all buttons after a rearrange
 
 """
 
+# If True, do not poll arduinos before uploading or in the background
+# For whatever reason this is extremely slow when there are network problems
+# A network connection is likely still required to extract training params
+MINIMIZE_NETWORKING = False
+
 import sys
 from PyQt4 import QtCore, QtGui, uic
 from PyQt4.QtGui import QTableWidgetItem, QSpinBox, QComboBox, QPushButton
@@ -21,7 +26,36 @@ import numpy as np
 
 from django.core.management.base import BaseCommand
 
+def readlines_and_strip(filename):
+    res = []
+    with file(filename) as fi:
+        lb_lines = fi.readlines()
+
+    for line in lb_lines:
+        sline = line.strip()
+        if sline != '':
+            res.append(sline)
+    
+    return res
+
+
 ROW_HEIGHT = 23
+
+# These are the boxes to display and the order to display them in the runner
+# Also affects the boxes that are shown in the "attached boxes" renderer
+try:
+    LOCALE_BOXES = readlines_and_strip('LOCALE_BOXES')
+except IOError:
+    LOCALE_BOXES = sorted(runner.models.Box.objects.values_list('name', flat=True))
+
+# Colors of the boxes
+try:
+    LOCALE_COLORS = readlines_and_strip('LOCALE_COLORS')
+except IOError:
+    LOCALE_COLORS = []
+if len(LOCALE_COLORS) < len(LOCALE_BOXES):
+    LOCALE_COLORS += ['white'] * (len(LOCALE_BOXES) - len(LOCALE_COLORS))
+LOCALE_BOX2COLOR = dict([(k, v) for k, v in zip(LOCALE_BOXES, LOCALE_COLORS)])
 
 def probe_arduino_user(arduino):
     """Checks if any programs are using /dev/ttyACM*
@@ -99,19 +133,23 @@ def call_external(mouse, board, box, **other_python_parameters):
     # Make sure the arduino is available
     box_obj = runner.models.Box.objects.filter(name=box).first()
     arduino = box_obj.serial_port
-    result, pid_string = probe_arduino_user(arduino)
     
     # Get experimenter from mouse object
     experimenter = runner.models.Mouse.objects.filter(
         name=mouse).first().get_experimenter_display()
     
-    if result == 'in use':
-        print "cannot upload to box %s; in use by these PIDs: %s" % (
-            box, pid_string)
-        return
-    elif result != 'not in use':
-        print "cannot upload to box %s: %s" % (box, result)
-        return
+    if not MINIMIZE_NETWORKING:
+        # Check before uploading
+        result, pid_string = probe_arduino_user(arduino)
+    
+        if result == 'in use':
+            print "cannot upload to box %s; in use by these PIDs: %s" % (
+                box, pid_string)
+            return
+
+        elif result != 'not in use':
+            print "cannot upload to box %s: %s" % (box, result)
+            return
     
     print mouse, board, box, experimenter
     ArduFSM.Runner.start_runner_cli.main(mouse=mouse, board=board, box=box,
@@ -149,7 +187,7 @@ class MyApp(QtGui.QMainWindow, Ui_MainWindow):
         self.timer = QtCore.QTimer(self)
         self.timer.timeout.connect(self.poll_sessions)
         self.timer.start(6000)
-    
+
     def poll_sessions(self):
         """Poll sessions that have run and update row colors
         
@@ -231,7 +269,12 @@ class MyApp(QtGui.QMainWindow, Ui_MainWindow):
                 for n in range(len(self.relevant_box_arduinos))
                 if self.relevant_box_arduinos[n] == arduino 
             ]
-            arduino_status, pid_string = probe_arduino_user(arduino)
+            
+            if MINIMIZE_NETWORKING:
+                arduino_status = 'unk'                
+            else:
+                arduino_status, pid_string = probe_arduino_user(arduino)
+
             attached_arduino_strings.append('%s (%s; %s)' % (
                 arduino[-4:], arduino_status, '/'.join(matching_box_names)))
 
@@ -244,6 +287,13 @@ class MyApp(QtGui.QMainWindow, Ui_MainWindow):
             ]
             attached_camera_strings.append('%s (%s)' % (
                 camera[-6:], '/'.join(matching_box_names)))
+        
+        # Also poll any attached arduinos that do NOT correspond to known boxes
+        for ardunum in range(10):
+            ardupath = '/dev/ttyACM%d' % ardunum
+            if ardupath not in self.relevant_box_arduinos:
+                if os.path.exists(ardupath):
+                    attached_arduino_strings.append(ardupath)
         
         self.attached_boxes_display.setText(
             '\n'.join(attached_arduino_strings))
@@ -259,36 +309,59 @@ class MyApp(QtGui.QMainWindow, Ui_MainWindow):
             '-date_time_start')[0].date_time_start.astimezone(tz).date()
         self.target_date_display.setText(target_date.strftime('%Y-%m-%d'))
         
+        # Only include sessions from at least this recent
+        # This should be longer than the max vacation time
+        recency_cutoff = target_date - datetime.timedelta(days=21)
+        
         # Get all mice that are in training
         mice_qs = runner.models.Mouse.objects.filter(in_training=True)
         
         # Get previous session from each mouse
         previous_sessions = []
+        previous_sessions_sort_keys = []
         new_mice = []
         for mouse in mice_qs.all():
-            # Find previous sessions
+            # Find previous sessions from this mouse from all boxes,
+            # sorted by date and excluding ancient ones
             mouse_prev_sess_qs = runner.models.Session.objects.filter(
-                mouse=mouse).order_by('date_time_start')
+                mouse=mouse,
+                date_time_start__date__gte=recency_cutoff,).order_by(
+                'date_time_start')
             
             # Store the most recent, or if None, add to new_mice
             if mouse_prev_sess_qs.count() > 0:
-                previous_sessions.append(mouse_prev_sess_qs.last())
+                # The most recent
+                sess = mouse_prev_sess_qs.last()
+                
+                # Skip if the last session was not in LOCALE_BOXES, that is, 
+                # if it was trained on some other setup
+                if sess.box.name not in LOCALE_BOXES:
+                    continue
+                
+                # Store sess
+                previous_sessions.append(sess)
+                
+                # Store these sort keys to enable sorting
+                # Index into LOCALE_BOXES
+                previous_sessions_board_idx = LOCALE_BOXES.index(sess.box.name)
+                
+                # date time start
+                dtstart = sess.date_time_start
+                
+                # sort keys
+                previous_sessions_sort_keys.append(
+                    (previous_sessions_board_idx, dtstart))
             else:
                 new_mice.append(mouse)
         
-        # Sort the sessions by board, and then time
-        previous_sessions = sorted(previous_sessions, 
-            key=lambda s: (s.board.name, s.date_time_start))
+        # Incantantion to sort previous_sessions by sort keys
+        previous_sessions = [x for junk, x in sorted(zip(
+            previous_sessions_sort_keys, previous_sessions))]
         
         # Get the choices for box and board
-        box_l = sorted(
-            runner.models.Box.objects.all().values_list('name', flat=True))
+        box_l = LOCALE_BOXES
         board_l = sorted(
             runner.models.Board.objects.all().values_list('name', flat=True))
-        #~ box_l = sorted(np.unique(
-            #~ [session.box.name for session in previous_sessions]))
-        #~ board_l = sorted(np.unique(
-            #~ [session.board.name for session in previous_sessions]))
         
         # Get box arduinos and cameras for polling
         self.relevant_box_names = []
@@ -371,7 +444,14 @@ class MyApp(QtGui.QMainWindow, Ui_MainWindow):
 
     def start_session(self, row):
         """Collect data from row and pass to start session"""
+        # Highlight clicked cell
         self.daily_plan_table.setCurrentCell(row, 6)
+        
+        # Get color from box
+        box_name = str(self.daily_plan_table.cellWidget(row, 2).currentText())
+        fig_color = LOCALE_BOX2COLOR[box_name]
+        
+        # Call
         call_external(
             mouse=str(self.daily_plan_table.item(row, 0).text()),
             board=str(self.daily_plan_table.cellWidget(row, 3).currentText()),
@@ -379,6 +459,7 @@ class MyApp(QtGui.QMainWindow, Ui_MainWindow):
             #~ recent_date=str(self.target_date_display.getText()),
             recent_weight=str(self.daily_plan_table.item(row, 1).text()),
             recent_pipe=str(self.daily_plan_table.item(row, 4).text()),
+            background_color=fig_color,
         )
 
     def start_session2(self, row_qb):

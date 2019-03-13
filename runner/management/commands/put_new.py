@@ -70,11 +70,21 @@ class Command(NoArgsCommand):
 
             # Manually put in some stuff for perfdf if not stored
             if 'left_perf' not in results:
+                # See if we can load a trial matrix
+                # I think we should probably continue if not, but not sure
+                # why this is here
                 data_available = True
                 try:
                     tm = MCwatch.behavior.db.get_trial_matrix(session_name)
                 except IOError:
                     data_available = False
+                
+                # Continue if trial matrix is available, but empty
+                # This happens when something went wrong, typically a 
+                # corrupted logfile
+                if data_available and len(tm) == 0:
+                    print "empty trial matrix for session %s, cannot put_new" % (session_name)
+                    continue
                 
                 if data_available:
                     # Left and right perf
